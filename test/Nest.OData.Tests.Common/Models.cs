@@ -11,7 +11,7 @@ namespace Nest.OData.Tests.Common
         public DateTimeOffset CreatedDate { get; set; }
         public DateTimeOffset? UpdatedDate { get; set; }
 
-        public virtual ProductDetail Detail { get; set; }
+        public virtual ProductDetail ProductDetail { get; set; }
         public virtual ICollection<Supplier> ProductSuppliers { get; set; }
         public virtual ICollection<Order> ProductOrders { get; set; }
 
@@ -22,6 +22,8 @@ namespace Nest.OData.Tests.Common
     {
         public string Id { get; set; }
         public string Info { get; set; }
+
+        public ProductRating ProductRating { get; set; }
     }
 
     public class Supplier

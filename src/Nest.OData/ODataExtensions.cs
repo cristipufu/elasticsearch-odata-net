@@ -104,12 +104,31 @@ namespace Nest.OData
 
         private static string ExtractFieldName(QueryNode node)
         {
-            if (node is SingleValuePropertyAccessNode propertyNode)
+            var segments = new List<string>();
+
+            void ProcessNode(QueryNode currentNode)
             {
-                return propertyNode.Property.Name;
+                switch (currentNode)
+                {
+                    case SingleValuePropertyAccessNode propertyAccessNode:
+                        segments.Insert(0, propertyAccessNode.Property.Name);
+                        ProcessNode(propertyAccessNode.Source);
+                        break;
+                    case SingleNavigationNode navigationNode:
+                        segments.Insert(0, navigationNode.NavigationProperty.Name);
+                        ProcessNode(navigationNode.Source);
+                        break;
+                }
             }
 
-            throw new NotImplementedException("Complex field names are not supported yet.");
+            ProcessNode(node);
+
+            if (segments.Count == 0)
+            {
+                throw new NotImplementedException("No field name could be extracted.");
+            }
+
+            return string.Join(".", segments);
         }
 
         private static string ExtractValue(QueryNode node)

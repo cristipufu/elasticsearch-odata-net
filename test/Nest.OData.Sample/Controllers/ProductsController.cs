@@ -24,7 +24,7 @@ namespace Nest.OData.Sample.Controllers
                     Others = ["Others1", "Others2", "Others3"],
                     CreatedDate = new DateTimeOffset(2001, 4, 15, 16, 24, 8, TimeSpan.FromHours(-8)),
                     UpdatedDate = new DateTimeOffset(2011, 2, 15, 16, 24, 8, TimeSpan.FromHours(-8)),
-                    Detail = new ProductDetail { Id = "Id" + i, Info = "Info" + i },
+                    ProductDetail = new ProductDetail { Id = "Id" + i, Info = "Info" + i },
                     ProductOrders = [
                         new Order
                         {
