@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Elasticsearch.Net;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Abstracts;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
@@ -30,6 +31,19 @@ namespace Nest.OData.Tests
             context.RequestServices = edmModel.GetServiceProvider();
 
             return new ODataQueryOptions<T>(new ODataQueryContext(edmModel, typeof(T), new ODataPath()), context.Request);
+        }
+
+        public static string ToJson(this QueryContainer queryContainer)
+        {
+            var settings = new ConnectionSettings(new SingleNodeConnectionPool(new Uri("http://localhost:9200")))
+                .DefaultIndex("dummy");
+            var elasticClient = new ElasticClient(settings);
+
+            using var stream = new MemoryStream();
+            elasticClient.RequestResponseSerializer.Serialize(new SearchRequest { Query = queryContainer }, stream);
+            stream.Position = 0;
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }
