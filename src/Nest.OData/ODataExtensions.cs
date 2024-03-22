@@ -31,19 +31,60 @@ namespace Nest.OData
 
         private static QueryContainer TranslateBinaryOperatorNode(BinaryOperatorNode node)
         {
-            var left = TranslateExpression(node.Left);
-            var right = TranslateExpression(node.Right);
-
             return node.OperatorKind switch
             {
-                BinaryOperatorKind.And => (QueryContainer)new BoolQuery { Must = [left, right] },
-                BinaryOperatorKind.Or => (QueryContainer)new BoolQuery { Should = [left, right], MinimumShouldMatch = 1 },
+                BinaryOperatorKind.And => AggregateAndOperations(node),
+                BinaryOperatorKind.Or => AggregateOrOperations(node),
                 BinaryOperatorKind.Equal => (QueryContainer)new TermQuery { Field = ExtractFieldName(node.Left), Value = ExtractValue(node.Right) },
                 BinaryOperatorKind.NotEqual => (QueryContainer)!new TermQuery { Field = ExtractFieldName(node.Left), Value = ExtractValue(node.Right) },
                 BinaryOperatorKind.GreaterThan => (QueryContainer)new TermRangeQuery { Field = ExtractFieldName(node.Left), GreaterThan = ExtractValue(node.Right) },
                 BinaryOperatorKind.LessThan => (QueryContainer)new TermRangeQuery { Field = ExtractFieldName(node.Left), LessThan = ExtractValue(node.Right) },
                 _ => throw new NotImplementedException($"Unsupported binary operator: {node.OperatorKind}"),
             };
+        }
+
+        private static QueryContainer AggregateOrOperations(BinaryOperatorNode node)
+        {
+            var queries = new List<QueryContainer>();
+
+            void Collect(QueryNode queryNode)
+            {
+                if (queryNode is BinaryOperatorNode binaryNode && binaryNode.OperatorKind == BinaryOperatorKind.Or)
+                {
+                    Collect(binaryNode.Left);
+                    Collect(binaryNode.Right);
+                }
+                else
+                {
+                    queries.Add(TranslateExpression(queryNode));
+                }
+            }
+
+            Collect(node);
+
+            return new BoolQuery { Should = queries, MinimumShouldMatch = 1 };
+        }
+
+        private static QueryContainer AggregateAndOperations(BinaryOperatorNode node)
+        {
+            var queries = new List<QueryContainer>();
+
+            void Collect(QueryNode queryNode)
+            {
+                if (queryNode is BinaryOperatorNode binaryNode && binaryNode.OperatorKind == BinaryOperatorKind.And)
+                {
+                    Collect(binaryNode.Left);
+                    Collect(binaryNode.Right);
+                }
+                else
+                {
+                    queries.Add(TranslateExpression(queryNode));
+                }
+            }
+
+            Collect(node);
+
+            return new BoolQuery { Must = queries };
         }
 
         private static QueryContainer TranslateSingleValueFunctionCallNode(SingleValueFunctionCallNode node)

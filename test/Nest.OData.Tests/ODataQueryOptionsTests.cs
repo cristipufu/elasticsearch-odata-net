@@ -1,5 +1,6 @@
 ﻿using Nest.OData.Tests.Common;
 using Newtonsoft.Json.Linq;
+using System.Security.Cryptography.Xml;
 using Xunit;
 
 namespace Nest.OData.Tests
@@ -102,6 +103,120 @@ namespace Nest.OData.Tests
 
             var expectedJson = @"
             {""query"":{""bool"":{""minimum_should_match"":1,""should"":[{""term"":{""Category"":{""value"":""Goods""}}},{""term"":{""Color"":{""value"":""Red""}}}]}}}";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            // Assert
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
+        public void OrMultipleOperators()
+        {
+            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Id eq 40938 and ((Color eq 'Red') or (Color eq 'Green') or (Color eq 'Blue'))");
+
+            var queryContainer = queryOptions.ToQueryContainer();
+
+            Assert.NotNull(queryContainer);
+
+            var queryJson = queryContainer.ToJson();
+
+            var expectedJson = @"
+            {
+              ""query"": {
+                ""bool"": {
+                  ""must"": [
+                    {
+                      ""term"": {
+                        ""Id"": {
+                          ""value"": ""40938""
+                        }
+                      }
+                    },
+                    {
+                      ""bool"": {
+                        ""minimum_should_match"": 1,
+                        ""should"": [
+                          {
+                            ""term"": {
+                              ""Color"": {
+                                ""value"": ""Red""
+                              }
+                            }
+                          },
+                          {
+                            ""term"": {
+                              ""Color"": {
+                                ""value"": ""Green""
+                              }
+                            }
+                          },
+                          {
+                            ""term"": {
+                              ""Color"": {
+                                ""value"": ""Blue""
+                              }
+                            }
+                          }
+                        ]}}]}}}";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            // Assert
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
+        public void AndMultipleOperators()
+        {
+            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Id eq 69 or ((Color eq 'Red') and (Category eq 'Goods') and (Name eq 'Phone'))");
+
+            var queryContainer = queryOptions.ToQueryContainer();
+
+            Assert.NotNull(queryContainer);
+
+            var queryJson = queryContainer.ToJson();
+
+            var expectedJson = @"
+            {
+              ""query"": {
+                ""bool"": {
+                  ""minimum_should_match"": 1,
+                  ""should"": [
+                    {
+                      ""term"": {
+                        ""Id"": {
+                          ""value"": ""69""
+                        }
+                      }
+                    },
+                    {
+                      ""bool"": {
+                        ""must"": [
+                          {
+                            ""term"": {
+                              ""Color"": {
+                                ""value"": ""Red""
+                              }
+                            }
+                          },
+                          {
+                            ""term"": {
+                              ""Category"": {
+                                ""value"": ""Goods""
+                              }
+                            }
+                          },
+                          {
+                            ""term"": {
+                              ""Name"": {
+                                ""value"": ""Phone""
+                              }
+                            }
+                          }
+                        ]}}]}}}";
 
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);

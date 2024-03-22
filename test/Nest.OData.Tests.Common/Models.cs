@@ -5,6 +5,7 @@ namespace Nest.OData.Tests.Common
     {
         public int Id { get; set; }
         public string Category { get; set; }
+        public string Name { get; set; }
         public Color Color { get; set; }
         public IList<string> Others { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
