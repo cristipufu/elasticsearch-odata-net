@@ -94,8 +94,10 @@ namespace Nest.OData
 
             return node.Name.ToLower() switch
             {
-                "startswith" => (QueryContainer)new PrefixQuery { Field = field, Value = value },
-                "contains" => (QueryContainer)new WildcardQuery { Field = field, Value = $"*{value}*" },
+                "startswith" => new PrefixQuery { Field = field, Value = value },
+                "endswith" => new WildcardQuery { Field = field, Value = $"*{value}" },
+                "contains" => new WildcardQuery { Field = field, Value = $"*{value}*" },
+                "substringof" => new MatchQuery { Field = field, Query = value },
                 _ => throw new NotImplementedException($"Unsupported function: {node.Name}"),
             };
         }

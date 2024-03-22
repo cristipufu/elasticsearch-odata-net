@@ -1,11 +1,10 @@
 ﻿using Nest.OData.Tests.Common;
 using Newtonsoft.Json.Linq;
-using System.Security.Cryptography.Xml;
 using Xunit;
 
 namespace Nest.OData.Tests
 {
-    public class ODataQueryOptionsTests
+    public class ODataQueryOptionsOperatorTests
     {
         [Fact]
         public void QueryOptionsFromQueryString()
