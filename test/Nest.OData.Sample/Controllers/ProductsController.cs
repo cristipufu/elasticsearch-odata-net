@@ -21,7 +21,7 @@ namespace Nest.OData.Sample.Controllers
                     Id = i,
                     Category = "Goods" + i,
                     Color = Color.Red,
-                    Others = ["Others1", "Others2", "Others3"],
+                    Tags = ["Electronics", "Food", "Plants"],
                     CreatedDate = new DateTimeOffset(2001, 4, 15, 16, 24, 8, TimeSpan.FromHours(-8)),
                     UpdatedDate = new DateTimeOffset(2011, 2, 15, 16, 24, 8, TimeSpan.FromHours(-8)),
                     ProductDetail = new ProductDetail { Id = "Id" + i, Info = "Info" + i },
