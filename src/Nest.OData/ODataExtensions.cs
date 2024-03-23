@@ -16,12 +16,13 @@ namespace Nest.OData
             return TranslateExpression(queryOptions.Filter.FilterClause.Expression);
         }
 
-        private static QueryContainer TranslateExpression(QueryNode node)
+        private static QueryContainer TranslateExpression(QueryNode node, string prefix = null)
         {
             return node.Kind switch
             {
-                QueryNodeKind.BinaryOperator => TranslateOperatorNode(node as BinaryOperatorNode),
-                QueryNodeKind.SingleValueFunctionCall => TranslateFunctionCallNode(node as SingleValueFunctionCallNode),
+                QueryNodeKind.Any => TranslateAnyNode(node as AnyNode),
+                QueryNodeKind.BinaryOperator => TranslateOperatorNode(node as BinaryOperatorNode, prefix),
+                QueryNodeKind.SingleValueFunctionCall => TranslateFunctionCallNode(node as SingleValueFunctionCallNode, prefix),
                 QueryNodeKind.Convert => TranslateExpression(((ConvertNode)node).Source),
                 QueryNodeKind.SingleValuePropertyAccess => null, 
                 QueryNodeKind.Constant => null,
@@ -29,10 +30,28 @@ namespace Nest.OData
             };
         }
 
-        private static QueryContainer TranslateOperatorNode(BinaryOperatorNode node)
+        private static QueryContainer TranslateAnyNode(AnyNode node)
         {
-            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(node.Left);
-            var fieldName = GetFieldName(fullyQualifiedFieldName);
+            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(node.Source);
+
+            var query = TranslateExpression(node.Body, fullyQualifiedFieldName); 
+
+            if ((node.Source is CollectionPropertyAccessNode collectionNode) && collectionNode.Source is SingleNavigationNode)
+            {
+                return new NestedQuery
+                {
+                    Path = ExtractNestedPath(fullyQualifiedFieldName),
+                    Query = query,
+                };
+            }
+
+            return query;
+        }
+
+        private static QueryContainer TranslateOperatorNode(BinaryOperatorNode node, string prefix = null)
+        {
+            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(node.Left, prefix);
+            var fieldName = ExtractFieldName(fullyQualifiedFieldName);
 
             var query = node.OperatorKind switch
             {
@@ -45,11 +64,40 @@ namespace Nest.OData
                 _ => throw new NotImplementedException($"Unsupported binary operator: {node.OperatorKind}"),
             };
 
-            if ((node.Left as SingleValuePropertyAccessNode).Source is SingleNavigationNode)
+            if ((node.Left is SingleValuePropertyAccessNode singleValueNode) && singleValueNode.Source is SingleNavigationNode)
             {
                 return new NestedQuery
                 {
-                    Path = GetNestedPath(fullyQualifiedFieldName),
+                    Path = ExtractNestedPath(fullyQualifiedFieldName),
+                    Query = query,
+                };
+            }
+
+            return query;
+        }
+
+        private static QueryContainer TranslateFunctionCallNode(SingleValueFunctionCallNode node, string prefix = null)
+        {
+            var left = node.Parameters.First();
+            var right = node.Parameters.Last();
+            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(left, prefix);
+            var fieldName = ExtractFieldName(fullyQualifiedFieldName);
+            var value = ExtractValue(right);
+
+            var query = node.Name.ToLower() switch
+            {
+                "startswith" => (QueryContainer)new PrefixQuery { Field = fieldName, Value = value },
+                "endswith" => new WildcardQuery { Field = fieldName, Value = $"*{value}" },
+                "contains" => new WildcardQuery { Field = fieldName, Value = $"*{value}*" },
+                "substringof" => new MatchQuery { Field = fieldName, Query = value },
+                _ => throw new NotImplementedException($"Unsupported function: {node.Name}"),
+            };
+
+            if ((left is SingleValuePropertyAccessNode singleValueNode) && singleValueNode.Source is SingleNavigationNode)
+            {
+                return new NestedQuery
+                {
+                    Path = ExtractNestedPath(fullyQualifiedFieldName),
                     Query = query,
                 };
             }
@@ -101,36 +149,7 @@ namespace Nest.OData
             return new BoolQuery { Must = queries };
         }
 
-        private static QueryContainer TranslateFunctionCallNode(SingleValueFunctionCallNode node)
-        {
-            var left = node.Parameters.First();
-            var right = node.Parameters.Last();
-            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(left);
-            var fieldName = GetFieldName(fullyQualifiedFieldName);
-            var value = ExtractValue(right);
-
-            var query = node.Name.ToLower() switch
-            {
-                "startswith" => (QueryContainer)new PrefixQuery { Field = fieldName, Value = value },
-                "endswith" => new WildcardQuery { Field = fieldName, Value = $"*{value}" },
-                "contains" => new WildcardQuery { Field = fieldName, Value = $"*{value}*" },
-                "substringof" => new MatchQuery { Field = fieldName, Query = value },
-                _ => throw new NotImplementedException($"Unsupported function: {node.Name}"),
-            };
-
-            if ((left as SingleValuePropertyAccessNode).Source is SingleNavigationNode)
-            {
-                return new NestedQuery
-                {
-                    Path = GetNestedPath(fullyQualifiedFieldName),
-                    Query = query,
-                };
-            }
-
-            return query;
-        }
-
-        private static string ExtractFullyQualifiedFieldName(QueryNode node)
+        private static string ExtractFullyQualifiedFieldName(QueryNode node, string prefix = null)
         {
             var segments = new List<string>();
 
@@ -138,13 +157,17 @@ namespace Nest.OData
             {
                 switch (currentNode)
                 {
-                    case SingleValuePropertyAccessNode propertyAccessNode:
-                        segments.Insert(0, propertyAccessNode.Property.Name);
-                        ProcessNode(propertyAccessNode.Source);
+                    case SingleValuePropertyAccessNode singleValue:
+                        segments.Insert(0, singleValue.Property.Name);
+                        ProcessNode(singleValue.Source);
                         break;
                     case SingleNavigationNode navigationNode:
                         segments.Insert(0, navigationNode.NavigationProperty.Name);
                         ProcessNode(navigationNode.Source);
+                        break;
+                    case CollectionPropertyAccessNode collectionNode:
+                        segments.Insert(0, collectionNode.Property.Name);
+                        ProcessNode(collectionNode.Source);
                         break;
                 }
             }
@@ -153,19 +176,24 @@ namespace Nest.OData
 
             if (segments.Count == 0)
             {
-                throw new NotImplementedException("No field name could be extracted.");
+                return prefix ?? throw new NotImplementedException("No field name could be extracted."); ;
+            }
+
+            if (prefix != null)
+            {
+                segments.Insert(0, prefix);
             }
 
             return string.Join(".", segments);
         }
 
-        private static string GetNestedPath(string fullyQualifiedFieldName)
+        private static string ExtractNestedPath(string fullyQualifiedFieldName)
         {
             var lastIndex = fullyQualifiedFieldName.LastIndexOf('.');
             return lastIndex > 0 ? fullyQualifiedFieldName[..lastIndex] : fullyQualifiedFieldName;
         }
 
-        private static string GetFieldName(string fullyQualifiedFieldName)
+        private static string ExtractFieldName(string fullyQualifiedFieldName)
         {
             var lastIndex = fullyQualifiedFieldName.LastIndexOf('.') + 1;
             return lastIndex > 0 ? fullyQualifiedFieldName[lastIndex..] : fullyQualifiedFieldName;

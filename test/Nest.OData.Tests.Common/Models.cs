@@ -23,6 +23,8 @@ namespace Nest.OData.Tests.Common
         public string Id { get; set; }
         public string Info { get; set; }
 
+        public IList<string> Tags { get; set; }
+
         public ProductRating ProductRating { get; set; }
     }
 
