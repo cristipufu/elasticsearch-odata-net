@@ -16,15 +16,15 @@ namespace Nest.OData
             return TranslateExpression(queryOptions.Filter.FilterClause.Expression);
         }
 
-        private static QueryContainer TranslateExpression(QueryNode node, string prefix = null)
+        private static QueryContainer TranslateExpression(QueryNode node, ODataExpressionContext context = null)
         {
             return node.Kind switch
             {
                 QueryNodeKind.Any => TranslateAnyNode(node as AnyNode),
-                QueryNodeKind.BinaryOperator => TranslateOperatorNode(node as BinaryOperatorNode, prefix),
-                QueryNodeKind.SingleValueFunctionCall => TranslateFunctionCallNode(node as SingleValueFunctionCallNode, prefix),
+                QueryNodeKind.BinaryOperator => TranslateOperatorNode(node as BinaryOperatorNode, context),
+                QueryNodeKind.SingleValueFunctionCall => TranslateFunctionCallNode(node as SingleValueFunctionCallNode, context),
                 QueryNodeKind.Convert => TranslateExpression(((ConvertNode)node).Source),
-                QueryNodeKind.SingleValuePropertyAccess => null, 
+                QueryNodeKind.SingleValuePropertyAccess => null,
                 QueryNodeKind.Constant => null,
                 _ => throw new NotImplementedException($"Unsupported node type: {node.Kind}"),
             };
@@ -34,9 +34,15 @@ namespace Nest.OData
         {
             var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(node.Source);
 
-            var query = TranslateExpression(node.Body, fullyQualifiedFieldName); 
+            var isNavigationProperty = node.Source is CollectionNavigationNode ||
+                ((node.Source is CollectionPropertyAccessNode collectionNode) && IsNavigationNode(collectionNode.Source.Kind));
 
-            if ((node.Source is CollectionPropertyAccessNode collectionNode) && collectionNode.Source is SingleNavigationNode)
+            var query = TranslateExpression(node.Body, new ODataExpressionContext
+            {
+                PathPrefix = fullyQualifiedFieldName,
+            });
+
+            if (isNavigationProperty)
             {
                 return new NestedQuery
                 {
@@ -48,9 +54,9 @@ namespace Nest.OData
             return query;
         }
 
-        private static QueryContainer TranslateOperatorNode(BinaryOperatorNode node, string prefix = null)
+        private static QueryContainer TranslateOperatorNode(BinaryOperatorNode node, ODataExpressionContext context = null)
         {
-            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(node.Left, prefix);
+            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(node.Left, context?.PathPrefix);
             var fieldName = ExtractFieldName(fullyQualifiedFieldName);
 
             var query = node.OperatorKind switch
@@ -64,7 +70,7 @@ namespace Nest.OData
                 _ => throw new NotImplementedException($"Unsupported binary operator: {node.OperatorKind}"),
             };
 
-            if ((node.Left is SingleValuePropertyAccessNode singleValueNode) && singleValueNode.Source is SingleNavigationNode)
+            if (node.Left is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
             {
                 return new NestedQuery
                 {
@@ -76,11 +82,11 @@ namespace Nest.OData
             return query;
         }
 
-        private static QueryContainer TranslateFunctionCallNode(SingleValueFunctionCallNode node, string prefix = null)
+        private static QueryContainer TranslateFunctionCallNode(SingleValueFunctionCallNode node, ODataExpressionContext context = null)
         {
             var left = node.Parameters.First();
             var right = node.Parameters.Last();
-            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(left, prefix);
+            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(left, context?.PathPrefix);
             var fieldName = ExtractFieldName(fullyQualifiedFieldName);
             var value = ExtractValue(right);
 
@@ -93,7 +99,7 @@ namespace Nest.OData
                 _ => throw new NotImplementedException($"Unsupported function: {node.Name}"),
             };
 
-            if ((left is SingleValuePropertyAccessNode singleValueNode) && singleValueNode.Source is SingleNavigationNode)
+            if (left is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
             {
                 return new NestedQuery
                 {
@@ -149,6 +155,12 @@ namespace Nest.OData
             return new BoolQuery { Must = queries };
         }
 
+        private static bool IsNavigationNode(QueryNodeKind kind)
+        {
+            return kind == QueryNodeKind.SingleNavigationNode ||
+                kind == QueryNodeKind.CollectionNavigationNode;
+        }
+
         private static string ExtractFullyQualifiedFieldName(QueryNode node, string prefix = null)
         {
             var segments = new List<string>();
@@ -161,13 +173,17 @@ namespace Nest.OData
                         segments.Insert(0, singleValue.Property.Name);
                         ProcessNode(singleValue.Source);
                         break;
-                    case SingleNavigationNode navigationNode:
-                        segments.Insert(0, navigationNode.NavigationProperty.Name);
-                        ProcessNode(navigationNode.Source);
+                    case SingleNavigationNode singleNavigationNode:
+                        segments.Insert(0, singleNavigationNode.NavigationProperty.Name);
+                        ProcessNode(singleNavigationNode.Source);
                         break;
                     case CollectionPropertyAccessNode collectionNode:
                         segments.Insert(0, collectionNode.Property.Name);
                         ProcessNode(collectionNode.Source);
+                        break;
+                    case CollectionNavigationNode collectionNavigationNode:
+                        segments.Insert(0, collectionNavigationNode.NavigationProperty.Name);
+                        ProcessNode(collectionNavigationNode.Source);
                         break;
                 }
             }
@@ -176,7 +192,7 @@ namespace Nest.OData
 
             if (segments.Count == 0)
             {
-                return prefix ?? throw new NotImplementedException("No field name could be extracted."); ;
+                return prefix;
             }
 
             if (prefix != null)
@@ -189,14 +205,26 @@ namespace Nest.OData
 
         private static string ExtractNestedPath(string fullyQualifiedFieldName)
         {
+            if (fullyQualifiedFieldName == null)
+            {
+                return null;
+            }
+
             var lastIndex = fullyQualifiedFieldName.LastIndexOf('.');
+
             return lastIndex > 0 ? fullyQualifiedFieldName[..lastIndex] : fullyQualifiedFieldName;
         }
 
         private static string ExtractFieldName(string fullyQualifiedFieldName)
         {
+            if (fullyQualifiedFieldName == null)
+            {
+                return null;
+            }
+
             var lastIndex = fullyQualifiedFieldName.LastIndexOf('.') + 1;
-            return lastIndex > 0 ? fullyQualifiedFieldName[lastIndex..] : fullyQualifiedFieldName;
+
+            return lastIndex > 1 ? fullyQualifiedFieldName[lastIndex..] : fullyQualifiedFieldName;
         }
 
         private static string ExtractValue(QueryNode node)
@@ -207,6 +235,11 @@ namespace Nest.OData
             }
 
             throw new NotImplementedException("Complex values are not supported yet.");
+        }
+
+        private class ODataExpressionContext
+        {
+            public string PathPrefix { get; set; }
         }
     }
 }

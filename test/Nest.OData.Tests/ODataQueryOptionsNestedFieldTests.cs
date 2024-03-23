@@ -125,5 +125,37 @@ namespace Nest.OData.Tests
             // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
+
+        [Fact]
+        public void NestedLambdaComplexTypeEq()
+        {
+            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=ProductSuppliers/any(s: s/Name eq 'Electronics')");
+
+            var queryContainer = queryOptions.ToQueryContainer();
+
+            Assert.NotNull(queryContainer);
+
+            var queryJson = queryContainer.ToJson();
+
+            var expectedJson = @"
+            {
+                ""query"": {
+                    ""nested"": {
+                        ""path"": ""ProductSuppliers"",
+                        ""query"": {
+                        ""term"": {
+                            ""Name"": {
+                            ""value"": ""Electronics""
+                            }
+                        }
+                    }
+                }}}";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            // Assert
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
     }
 }
