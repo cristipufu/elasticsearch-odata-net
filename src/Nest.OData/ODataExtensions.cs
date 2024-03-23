@@ -66,7 +66,9 @@ namespace Nest.OData
                 BinaryOperatorKind.Equal => new TermQuery { Field = fieldName, Value = ExtractValue(node.Right) },
                 BinaryOperatorKind.NotEqual => !new TermQuery { Field = fieldName, Value = ExtractValue(node.Right) },
                 BinaryOperatorKind.GreaterThan => new TermRangeQuery { Field = fieldName, GreaterThan = ExtractValue(node.Right) },
+                BinaryOperatorKind.GreaterThanOrEqual => new TermRangeQuery { Field = fieldName, GreaterThanOrEqualTo = ExtractValue(node.Right) },
                 BinaryOperatorKind.LessThan => new TermRangeQuery { Field = fieldName, LessThan = ExtractValue(node.Right) },
+                BinaryOperatorKind.LessThanOrEqual => new TermRangeQuery { Field = fieldName, LessThanOrEqualTo = ExtractValue(node.Right) },
                 _ => throw new NotImplementedException($"Unsupported binary operator: {node.OperatorKind}"),
             };
 
