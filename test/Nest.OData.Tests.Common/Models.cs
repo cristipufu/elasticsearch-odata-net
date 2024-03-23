@@ -20,7 +20,7 @@ namespace Nest.OData.Tests.Common
 
     public class ProductDetail
     {
-        public string Id { get; set; }
+        public long Id { get; set; }
         public string Info { get; set; }
 
         public IList<string> Tags { get; set; }

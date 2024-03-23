@@ -48,6 +48,33 @@ namespace Nest.OData.Tests
         }
 
         [Fact]
+        public void InOperator()
+        {
+            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Category in ('Milk', 'Cheese')");
+
+            var queryContainer = queryOptions.ToQueryContainer();
+
+            Assert.NotNull(queryContainer);
+
+            var queryJson = queryContainer.ToJson();
+
+            var expectedJson = @"
+            {
+              ""query"": {
+                ""terms"": {
+                  ""Category"": [""Milk"", ""Cheese""]
+                }
+              }
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            // Assert
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
         public void EqOperatorWithEnumAsStringProperty()
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Color eq 'Red'");

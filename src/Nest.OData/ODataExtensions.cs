@@ -21,6 +21,7 @@ namespace Nest.OData
             return node.Kind switch
             {
                 QueryNodeKind.Any => TranslateAnyNode(node as AnyNode),
+                QueryNodeKind.In => TranslateInNode(node as InNode),
                 QueryNodeKind.BinaryOperator => TranslateOperatorNode(node as BinaryOperatorNode, context),
                 QueryNodeKind.SingleValueFunctionCall => TranslateFunctionCallNode(node as SingleValueFunctionCallNode, context),
                 QueryNodeKind.Convert => TranslateExpression(((ConvertNode)node).Source),
@@ -43,6 +44,36 @@ namespace Nest.OData
             });
 
             if (isNavigationProperty)
+            {
+                return new NestedQuery
+                {
+                    Path = ExtractNestedPath(fullyQualifiedFieldName),
+                    Query = query,
+                };
+            }
+
+            return query;
+        }
+
+        private static QueryContainer TranslateInNode(InNode node)
+        {
+            var fullyQualifiedFieldName = ExtractFullyQualifiedFieldName(node.Left);
+
+            if (node.Right is not CollectionConstantNode collectionNode)
+            {
+                throw new NotImplementedException("Right node is not CollectionConstantNode!");
+            }
+
+            var values = new List<string>();
+
+            foreach (var item in collectionNode.Collection)
+            {
+                values.Add(item.Value.ToString());
+            }
+
+            var query = new TermsQuery { Field = ExtractFieldName(fullyQualifiedFieldName), Terms = values };
+
+            if (node.Left is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
             {
                 return new NestedQuery
                 {

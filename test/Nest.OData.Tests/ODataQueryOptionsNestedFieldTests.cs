@@ -157,5 +157,37 @@ namespace Nest.OData.Tests
             // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
+
+        [Fact]
+        public void NestedComplexTypeInOperator()
+        {
+            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=ProductDetail/Id in (123, 456)");
+
+            var queryContainer = queryOptions.ToQueryContainer();
+
+            Assert.NotNull(queryContainer);
+
+            var queryJson = queryContainer.ToJson();
+
+            var expectedJson = @"
+            {
+              ""query"": {
+                ""nested"": {
+                  ""path"": ""ProductDetail"",
+                  ""query"": {
+                    ""terms"": {
+                      ""Id"": [""123"", ""456""]
+                    }
+                  }
+                }
+              }
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            // Assert
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
     }
 }
