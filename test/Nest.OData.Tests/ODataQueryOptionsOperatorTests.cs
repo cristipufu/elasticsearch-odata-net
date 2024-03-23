@@ -156,7 +156,7 @@ namespace Nest.OData.Tests
                     {
                       ""term"": {
                         ""Id"": {
-                          ""value"": ""40938""
+                          ""value"": 40938
                         }
                       }
                     },
@@ -214,7 +214,7 @@ namespace Nest.OData.Tests
                     {
                       ""term"": {
                         ""Id"": {
-                          ""value"": ""69""
+                          ""value"": 69
                         }
                       }
                     },

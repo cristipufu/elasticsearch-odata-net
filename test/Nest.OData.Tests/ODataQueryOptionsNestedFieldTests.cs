@@ -176,7 +176,7 @@ namespace Nest.OData.Tests
                   ""path"": ""ProductDetail"",
                   ""query"": {
                     ""terms"": {
-                      ""Id"": [""123"", ""456""]
+                      ""Id"": [123, 456]
                     }
                   }
                 }

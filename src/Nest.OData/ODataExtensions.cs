@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.OData.Query;
+using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
 #nullable disable
@@ -64,11 +65,11 @@ namespace Nest.OData
                 throw new NotImplementedException("Right node is not CollectionConstantNode!");
             }
 
-            var values = new List<string>();
+            var values = new List<object>();
 
             foreach (var item in collectionNode.Collection)
             {
-                values.Add(item.Value.ToString());
+                values.Add(item.Value);
             }
 
             var query = new TermsQuery { Field = ExtractFieldName(fullyQualifiedFieldName), Terms = values };
@@ -96,10 +97,10 @@ namespace Nest.OData
                 BinaryOperatorKind.Or => AggregateOrOperations(node),
                 BinaryOperatorKind.Equal => new TermQuery { Field = fieldName, Value = ExtractValue(node.Right) },
                 BinaryOperatorKind.NotEqual => !new TermQuery { Field = fieldName, Value = ExtractValue(node.Right) },
-                BinaryOperatorKind.GreaterThan => new TermRangeQuery { Field = fieldName, GreaterThan = ExtractValue(node.Right) },
-                BinaryOperatorKind.GreaterThanOrEqual => new TermRangeQuery { Field = fieldName, GreaterThanOrEqualTo = ExtractValue(node.Right) },
-                BinaryOperatorKind.LessThan => new TermRangeQuery { Field = fieldName, LessThan = ExtractValue(node.Right) },
-                BinaryOperatorKind.LessThanOrEqual => new TermRangeQuery { Field = fieldName, LessThanOrEqualTo = ExtractValue(node.Right) },
+                BinaryOperatorKind.GreaterThan => new TermRangeQuery { Field = fieldName, GreaterThan = ExtractStringValue(node.Right) },
+                BinaryOperatorKind.GreaterThanOrEqual => new TermRangeQuery { Field = fieldName, GreaterThanOrEqualTo = ExtractStringValue(node.Right) },
+                BinaryOperatorKind.LessThan => new TermRangeQuery { Field = fieldName, LessThan = ExtractStringValue(node.Right) },
+                BinaryOperatorKind.LessThanOrEqual => new TermRangeQuery { Field = fieldName, LessThanOrEqualTo = ExtractStringValue(node.Right) },
                 _ => throw new NotImplementedException($"Unsupported binary operator: {node.OperatorKind}"),
             };
 
@@ -128,7 +129,7 @@ namespace Nest.OData
                 "startswith" => (QueryContainer)new PrefixQuery { Field = fieldName, Value = value },
                 "endswith" => new WildcardQuery { Field = fieldName, Value = $"*{value}" },
                 "contains" => new WildcardQuery { Field = fieldName, Value = $"*{value}*" },
-                "substringof" => new MatchQuery { Field = fieldName, Query = value },
+                "substringof" => new MatchQuery { Field = fieldName, Query = value.ToString() },
                 _ => throw new NotImplementedException($"Unsupported function: {node.Name}"),
             };
 
@@ -260,11 +261,26 @@ namespace Nest.OData
             return lastIndex > 1 ? fullyQualifiedFieldName[lastIndex..] : fullyQualifiedFieldName;
         }
 
-        private static string ExtractValue(QueryNode node)
+        private static object ExtractValue(QueryNode node)
         {
             if (node is ConstantNode constantNode)
             {
-                return constantNode.Value.ToString();
+                if (constantNode.TypeReference is IEdmEnumTypeReference)
+                {
+                    return constantNode.Value?.ToString();
+                }
+
+                return constantNode.Value;
+            }
+
+            throw new NotImplementedException("Complex values are not supported yet.");
+        }
+
+        private static string ExtractStringValue(QueryNode node)
+        {
+            if (node is ConstantNode constantNode)
+            {
+                return constantNode.Value?.ToString();
             }
 
             throw new NotImplementedException("Complex values are not supported yet.");
