@@ -1,5 +1,5 @@
 # Elasticsearch OData Extension
-Welcome to the Elasticsearch OData Extension repository. This project bridges the gap between the flexibility of OData queries and the powerful search capabilities of Elasticsearch, allowing you to leverage OData query syntax to query your Elasticsearch indices. Whether you're dealing with complex nested objects, arrays, or just need to perform simple searches, this extension has got you covered.
+This project bridges the gap between the flexibility of OData queries and the powerful search capabilities of Elasticsearch, allowing you to leverage OData query syntax to query your Elasticsearch indices. Whether you're dealing with complex nested objects, arrays, or just need to perform simple searches, this extension has got you covered.
 
 ## Getting Started
 To start using this extension, include it in your project and configure it to point to your Elasticsearch instance. Here's a quick example:
@@ -21,7 +21,7 @@ Replace `Document` with your document class that maps to your Elasticsearch inde
 ## Features
 This extension supports a wide range of OData query functionalities, tailored specifically for Elasticsearch's query DSL. Here's what you can do:
 
-## Supported OData Logical Operators
+### Supported OData Logical Operators
 - **`Equals`** (eq)
 - **`Not Equals`** (ne)
 - **`Greater Than`** (gt)
@@ -32,20 +32,20 @@ This extension supports a wide range of OData query functionalities, tailored sp
 - **`Or`**
 - **`In`**
 
-## Supported OData Functions
+### Supported OData Functions
 - **`startswith`**
 - **`endswith`**
 - **`contains`**
 - **`substringof`**
 
-## Supported Lambda Operators
+### Supported Lambda Operators
 - **`any`**
 - **`all`**
 
-## Handling Enums and Collections
+### Handling Enums and Collections
 Enums are treated as strings, allowing for straightforward comparisons without additional conversion steps. Collections, including simple arrays and nested objects, can be queried using the any and all functions, providing a seamless experience for working with complex data structures.
 
-## Advanced Query Scenarios
+### Advanced Query Scenarios
 The extension provides support for nested queries, allowing you to delve into nested objects and arrays within your documents to perform fine-grained searches. Whether you're filtering on properties of nested objects or querying arrays for specific elements, this extension translates your OData queries into efficient Elasticsearch DSL queries.
 
 `$filter=Tags/any(t: t/Name eq 'bug')`
