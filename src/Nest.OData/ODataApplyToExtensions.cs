@@ -20,7 +20,6 @@ namespace Nest.OData
                         TransformationNodeKind.Aggregate => searchDescriptor.ApplyAggregate(transformationNode as AggregateTransformationNode),
                         TransformationNodeKind.Filter => searchDescriptor.Query(q => ODataFilterExtensions.TranslateExpression((transformationNode as FilterTransformationNode).FilterClause.Expression)),
                         _ => searchDescriptor
-
                     };
                 }
             }

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Nest.OData.Tests
 {
-    public class ODataQueryOptionsFunctionTests
+    public class FilterFunctionTests
     {
         [Fact]
         public void StartsWithFunction()

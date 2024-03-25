@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Nest.OData.Tests
 {
-    public class ODataQueryOptionsOperatorTests
+    public class FilterOperatorTests
     {
         [Fact]
         public void QueryOptionsFromQueryString()

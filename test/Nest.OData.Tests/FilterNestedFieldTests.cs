@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Nest.OData.Tests
 {
-    public class ODataQueryOptionsNestedFieldTests
+    public class FilterNestedFieldTests
     {
         [Fact]
         public void NestedFieldContains()

@@ -1,20 +1,34 @@
 ﻿using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Nest.OData.Tests")]
 
 #nullable disable
 namespace Nest.OData
 {
     public static class ODataFilterExtensions
     {
-        public static QueryContainer ToQueryContainer<T>(this ODataQueryOptions<T> queryOptions)
+        public static SearchDescriptor<T> ApplyFilter<T>(this SearchDescriptor<T> searchDescriptor, FilterQueryOption filter) where T : class
         {
-            if (queryOptions?.Filter?.FilterClause?.Expression == null)
+            if (filter?.FilterClause?.Expression == null)
             {
-                return null;
+                return searchDescriptor;
             }
 
-            return TranslateExpression(queryOptions.Filter.FilterClause.Expression);
+            var queryContainer = TranslateExpression(filter.FilterClause.Expression);
+
+            if (queryContainer != null)
+            {
+                searchDescriptor.Query(q => queryContainer);
+            }
+            else
+            {
+                searchDescriptor.MatchAll();
+            }
+
+            return searchDescriptor;
         }
 
         internal static QueryContainer TranslateExpression(QueryNode node, ODataExpressionContext context = null)

@@ -61,7 +61,7 @@ namespace Nest.OData.Sample.Controllers
         [HttpGet]
         public IActionResult Get(ODataQueryOptions<Product> queryOptions)
         {
-            var queryContainer = queryOptions.ToQueryContainer();
+            var queryContainer = queryOptions.ToElasticsearchQuery();
 
             return Ok(products);
         }
