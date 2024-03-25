@@ -37,27 +37,31 @@ namespace Nest.OData
                 return searchDescriptor;
             }
 
-            var groupByProperties = groupByTransformationNode.GroupingProperties.ToList();
-
-            AggregationContainerDescriptor<T> aggregations = null;
-
-            groupByProperties.Reverse();
-
-            foreach (var property in groupByProperties)
+            AggregationContainerDescriptor<T> ApplyGroupByAggregation(AggregationContainerDescriptor<T> agg, GroupByPropertyNode node)
             {
-                var propertyName = property.Name;
-                aggregations = new AggregationContainerDescriptor<T>().Terms(
-                        "group_by_" + propertyName,
-                        t => t.Field(propertyName).Aggregations(a => aggregations)
-                    );
+                if (node.Expression == null)
+                {
+                    var childNode = node.ChildTransformations.First();
+
+                    return new AggregationContainerDescriptor<T>().Nested($"nested_{node.Name}_{childNode.Name}", n => n
+                        .Path(node.Name)
+                        .Aggregations(na => na
+                            .Terms($"group_by_{node.Name}_{childNode.Name}", t => t.Field($"{node.Name}.{childNode.Name}").Aggregations(a => agg))));
+                }
+                else
+                {
+                    return new AggregationContainerDescriptor<T>().Terms($"group_by_{node.Name}", t => t.Field(node.Name).Aggregations(a => agg));
+                }
             }
 
-            if (aggregations == null)
+            var initialAggregation = new AggregationContainerDescriptor<T>();
+
+            foreach (var property in groupByTransformationNode.GroupingProperties.Reverse().OrderBy(x => x.Expression is not null))
             {
-                return searchDescriptor;
+                initialAggregation = ApplyGroupByAggregation(initialAggregation, property);
             }
 
-            return searchDescriptor.Aggregations(a => aggregations);
+            return searchDescriptor.Aggregations(a => initialAggregation);
         }
 
         private static SearchDescriptor<T> ApplyAggregate<T>(this SearchDescriptor<T> searchDescriptor, AggregateTransformationNode aggregateTransformationNode) where T : class
