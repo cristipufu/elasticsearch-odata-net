@@ -33,7 +33,6 @@ namespace Nest.OData.Tests
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
 
@@ -59,7 +58,6 @@ namespace Nest.OData.Tests
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
 
@@ -91,7 +89,6 @@ namespace Nest.OData.Tests
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
     }

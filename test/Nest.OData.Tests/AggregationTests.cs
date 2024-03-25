@@ -11,18 +11,17 @@ namespace Nest.OData.Tests
         {
             var queryOptions = "$apply=groupby((Category))".GetODataQueryOptions<Product>();
 
-            var queryContainer = queryOptions.ToElasticQuery();
+            var elasticQuery = queryOptions.ToElasticQuery();
 
-            Assert.NotNull(queryContainer);
+            Assert.NotNull(elasticQuery);
 
-            var queryJson = queryContainer.ToJson();
+            var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"{""aggs"":{""group_by_Category"":{""terms"":{""field"":""Category""}}}}";
 
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
 
@@ -31,11 +30,11 @@ namespace Nest.OData.Tests
         {
             var queryOptions = "$apply=groupby((ProductDetail/Info))".GetODataQueryOptions<Product>();
 
-            var queryContainer = queryOptions.ToElasticQuery();
+            var elasticQuery = queryOptions.ToElasticQuery();
 
-            Assert.NotNull(queryContainer);
+            Assert.NotNull(elasticQuery);
 
-            var queryJson = queryContainer.ToJson();
+            var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"{
               ""aggs"": {
@@ -57,7 +56,6 @@ namespace Nest.OData.Tests
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
 
@@ -66,11 +64,11 @@ namespace Nest.OData.Tests
         {
             var queryOptions = "$apply=groupby((ProductDetail/Info,Category))".GetODataQueryOptions<Product>();
 
-            var queryContainer = queryOptions.ToElasticQuery();
+            var elasticQuery = queryOptions.ToElasticQuery();
 
-            Assert.NotNull(queryContainer);
+            Assert.NotNull(elasticQuery);
 
-            var queryJson = queryContainer.ToJson();
+            var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"{
               ""aggs"": {
@@ -99,7 +97,6 @@ namespace Nest.OData.Tests
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
 
@@ -108,11 +105,11 @@ namespace Nest.OData.Tests
         {
             var queryOptions = "$apply=groupby((Category,Color))".GetODataQueryOptions<Product>();
 
-            var queryContainer = queryOptions.ToElasticQuery();
+            var elasticQuery = queryOptions.ToElasticQuery();
 
-            Assert.NotNull(queryContainer);
+            Assert.NotNull(elasticQuery);
 
-            var queryJson = queryContainer.ToJson();
+            var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"{
               ""aggs"": {
@@ -134,7 +131,6 @@ namespace Nest.OData.Tests
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
     }

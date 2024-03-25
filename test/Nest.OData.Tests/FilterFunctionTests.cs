@@ -11,11 +11,11 @@ namespace Nest.OData.Tests
         {
             var queryOptions = "$filter=startswith(Category, 'Goods')".GetODataQueryOptions<Product>();
 
-            var queryContainer = queryOptions.ToElasticQuery();
+            var elasticQuery = queryOptions.ToElasticQuery();
 
-            Assert.NotNull(queryContainer);
+            Assert.NotNull(elasticQuery);
 
-            var queryJson = queryContainer.ToJson();
+            var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"
             {
@@ -31,7 +31,6 @@ namespace Nest.OData.Tests
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
 
@@ -40,11 +39,11 @@ namespace Nest.OData.Tests
         {
             var queryOptions = "$filter=endswith(Category, 'Goods')".GetODataQueryOptions<Product>();
 
-            var queryContainer = queryOptions.ToElasticQuery();
+            var elasticQuery = queryOptions.ToElasticQuery();
 
-            Assert.NotNull(queryContainer);
+            Assert.NotNull(elasticQuery);
 
-            var queryJson = queryContainer.ToJson();
+            var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"
             {
@@ -60,7 +59,6 @@ namespace Nest.OData.Tests
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
 
@@ -69,11 +67,11 @@ namespace Nest.OData.Tests
         {
             var queryOptions = "$filter=contains(Category, 'Goods')".GetODataQueryOptions<Product>();
 
-            var queryContainer = queryOptions.ToElasticQuery();
+            var elasticQuery = queryOptions.ToElasticQuery();
 
-            Assert.NotNull(queryContainer);
+            Assert.NotNull(elasticQuery);
 
-            var queryJson = queryContainer.ToJson();
+            var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"
             {
@@ -89,7 +87,6 @@ namespace Nest.OData.Tests
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
 
-            // Assert
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
     }
