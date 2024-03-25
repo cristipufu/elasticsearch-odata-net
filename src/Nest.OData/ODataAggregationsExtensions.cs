@@ -32,17 +32,32 @@ namespace Nest.OData
 
         private static SearchDescriptor<T> ApplyGroupBy<T>(this SearchDescriptor<T> searchDescriptor, GroupByTransformationNode groupByTransformationNode) where T : class
         {
-            var groupByProperties = groupByTransformationNode.GroupingProperties;
+            if (groupByTransformationNode?.GroupingProperties == null || !groupByTransformationNode.GroupingProperties.Any())
+            {
+                return searchDescriptor;
+            }
+
+            var groupByProperties = groupByTransformationNode.GroupingProperties.ToList();
+
+            AggregationContainerDescriptor<T> aggregations = null;
+
+            groupByProperties.Reverse();
 
             foreach (var property in groupByProperties)
             {
                 var propertyName = property.Name;
-
-                searchDescriptor.Aggregations(a =>
-                    a.Terms("group_by_" + propertyName, t => t.Field(propertyName)));
+                aggregations = new AggregationContainerDescriptor<T>().Terms(
+                        "group_by_" + propertyName,
+                        t => t.Field(propertyName).Aggregations(a => aggregations)
+                    );
             }
 
-            return searchDescriptor;
+            if (aggregations == null)
+            {
+                return searchDescriptor;
+            }
+
+            return searchDescriptor.Aggregations(a => aggregations);
         }
 
         private static SearchDescriptor<T> ApplyAggregate<T>(this SearchDescriptor<T> searchDescriptor, AggregateTransformationNode aggregateTransformationNode) where T : class
