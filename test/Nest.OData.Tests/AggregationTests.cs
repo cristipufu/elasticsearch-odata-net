@@ -9,7 +9,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void GroupBySimpleProperty()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$apply=groupby((Category))");
+            var queryOptions = "$apply=groupby((Category))".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -29,7 +29,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void GroupByMultipleSimpleProperties()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$apply=groupby((Category,Color))");
+            var queryOptions = "$apply=groupby((Category,Color))".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -37,7 +37,22 @@ namespace Nest.OData.Tests
 
             var queryJson = queryContainer.ToJson();
 
-            var expectedJson = @"{""aggs"":{""group_by_Category"":{""aggs"":{""group_by_Color"":{""terms"":{""field"":""Color""}}},""terms"":{""field"":""Category""}}}}";
+            var expectedJson = @"{
+              ""aggs"": {
+                ""group_by_Category"": {
+                  ""terms"": {
+                    ""field"": ""Category""
+                  },
+                  ""aggs"": {
+                    ""group_by_Color"": {
+                      ""terms"": {
+                        ""field"": ""Color""
+                      }
+                    }
+                  }
+                }
+              }
+            }";
 
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);

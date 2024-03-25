@@ -7,7 +7,7 @@ namespace Nest.OData
     /// <summary>
     /// https://docs.oasis-open.org/odata/odata-data-aggregation-ext/v4.0/cs01/odata-data-aggregation-ext-v4.0-cs01.html
     /// </summary>
-    public static class ODataAggregationsExtensions
+    public static class ODataAggregationExtensions
     {
         public static SearchDescriptor<T> Aggregate<T>(this SearchDescriptor<T> searchDescriptor, ApplyQueryOption applyQueryOption) where T : class
         {

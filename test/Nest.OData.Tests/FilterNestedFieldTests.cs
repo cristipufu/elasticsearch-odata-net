@@ -9,7 +9,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void NestedFieldContains()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=contains(ProductDetail/Info, 'searchTerm')");
+            var queryOptions = "$filter=contains(ProductDetail/Info, 'searchTerm')".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -43,7 +43,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void NestedMultipleFieldsGt()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=ProductDetail/ProductRating/Rating gt 1");
+            var queryOptions = "$filter=ProductDetail/ProductRating/Rating gt 1".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -77,7 +77,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void NestedAnyCollectionFieldsEq()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Tags/any(t: t eq 'Electronics')");
+            var queryOptions = "$filter=Tags/any(t: t eq 'Electronics')".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -98,7 +98,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void NestedComplexTypeAnyCollectionFieldsEq()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=ProductDetail/Tags/any(t: t eq 'Electronics')");
+            var queryOptions = "$filter=ProductDetail/Tags/any(t: t eq 'Electronics')".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -129,7 +129,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void NestedLambdaComplexTypeEq()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=ProductSuppliers/any(s: s/Name eq 'Electronics')");
+            var queryOptions = "$filter=ProductSuppliers/any(s: s/Name eq 'Electronics')".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -161,7 +161,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void NestedComplexTypeInOperator()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=ProductDetail/Id in (123, 456)");
+            var queryOptions = "$filter=ProductDetail/Id in (123, 456)".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -193,7 +193,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void NestedComplexTypeAllCollectionFieldsEq()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=ProductDetail/Tags/all(t: t eq 'Electronics')");
+            var queryOptions = "$filter=ProductDetail/Tags/all(t: t eq 'Electronics')".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 

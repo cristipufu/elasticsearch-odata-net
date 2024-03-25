@@ -9,7 +9,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void QueryOptionsFromQueryString()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Category eq 'Goods' and Color eq 'Red'");
+            var queryOptions = "$filter=Category eq 'Goods' and Color eq 'Red'".GetODataQueryOptions<Product>();
 
             Assert.NotNull(queryOptions);
             Assert.NotNull(queryOptions.Filter);
@@ -19,7 +19,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void EqOperatorWithStringProperty()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Category eq 'Goods'");
+            var queryOptions = "$filter=Category eq 'Goods'".GetODataQueryOptions<Product>();
 
             Assert.Equal("Category eq 'Goods'", queryOptions.Filter.RawValue);
 
@@ -50,7 +50,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void InOperator()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Category in ('Milk', 'Cheese')");
+            var queryOptions = "$filter=Category in ('Milk', 'Cheese')".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -77,7 +77,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void EqOperatorWithEnumAsStringProperty()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Color eq 'Red'");
+            var queryOptions = "$filter=Color eq 'Red'".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -98,7 +98,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void AndOperator()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Category eq 'Goods' and Color eq 'Red'");
+            var queryOptions = "$filter=Category eq 'Goods' and Color eq 'Red'".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -119,7 +119,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void OrOperator()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Category eq 'Goods' or Color eq 'Red'");
+            var queryOptions = "$filter=Category eq 'Goods' or Color eq 'Red'".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -140,7 +140,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void OrMultipleOperators()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Id eq 40938 and ((Color eq 'Red') or (Color eq 'Green') or (Color eq 'Blue'))");
+            var queryOptions = "$filter=Id eq 40938 and ((Color eq 'Red') or (Color eq 'Green') or (Color eq 'Blue'))".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 
@@ -197,7 +197,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void AndMultipleOperators()
         {
-            var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Id eq 69 or ((Color eq 'Red') and (Category eq 'Goods') and (Name eq 'Phone'))");
+            var queryOptions = "$filter=Id eq 69 or ((Color eq 'Red') and (Category eq 'Goods') and (Name eq 'Phone'))".GetODataQueryOptions<Product>();
 
             var queryContainer = queryOptions.ToElasticQuery();
 

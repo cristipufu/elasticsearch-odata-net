@@ -9,7 +9,7 @@ using Nest.OData.Tests.Common;
 
 namespace Nest.OData.Tests
 {
-    public static class Mock
+    public static class Helpers
     {
         public static IServiceProvider GetServiceProvider(this IEdmModel edmModel)
         {
@@ -23,7 +23,7 @@ namespace Nest.OData.Tests
             return mockServiceProvider.Object;
         }
 
-        public static ODataQueryOptions<T> GetODataQueryOptions<T>(string queryString)
+        public static ODataQueryOptions<T> GetODataQueryOptions<T>(this string queryString)
         {
             var edmModel = EdmModelBuilder.GetEdmModel();
             var context = new DefaultHttpContext();
