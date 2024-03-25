@@ -11,7 +11,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=startswith(Category, 'Goods')");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 
@@ -40,7 +40,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=endswith(Category, 'Goods')");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 
@@ -69,7 +69,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=contains(Category, 'Goods')");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 

@@ -11,7 +11,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$apply=groupby((Category))");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 
@@ -31,7 +31,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$apply=groupby((Category,Color))");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 

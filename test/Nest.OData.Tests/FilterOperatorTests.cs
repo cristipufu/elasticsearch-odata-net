@@ -23,7 +23,7 @@ namespace Nest.OData.Tests
 
             Assert.Equal("Category eq 'Goods'", queryOptions.Filter.RawValue);
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 
@@ -52,7 +52,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Category in ('Milk', 'Cheese')");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 
@@ -79,7 +79,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Color eq 'Red'");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 
@@ -100,7 +100,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Category eq 'Goods' and Color eq 'Red'");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 
@@ -121,7 +121,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Category eq 'Goods' or Color eq 'Red'");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 
@@ -142,7 +142,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Id eq 40938 and ((Color eq 'Red') or (Color eq 'Green') or (Color eq 'Blue'))");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 
@@ -199,7 +199,7 @@ namespace Nest.OData.Tests
         {
             var queryOptions = Mock.GetODataQueryOptions<Product>("$filter=Id eq 69 or ((Color eq 'Red') and (Category eq 'Goods') and (Name eq 'Phone'))");
 
-            var queryContainer = queryOptions.ToElasticsearchQuery();
+            var queryContainer = queryOptions.ToElasticQuery();
 
             Assert.NotNull(queryContainer);
 

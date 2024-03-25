@@ -5,7 +5,7 @@ namespace Nest.OData
 {
     public static class ODataExtensions
     {
-        public static SearchDescriptor<T> ToElasticsearchQuery<T>(this ODataQueryOptions<T> queryOptions) where T : class
+        public static SearchDescriptor<T> ToElasticQuery<T>(this ODataQueryOptions<T> queryOptions) where T : class
         {
             return new SearchDescriptor<T>()
                 .Query(queryOptions.Filter)
