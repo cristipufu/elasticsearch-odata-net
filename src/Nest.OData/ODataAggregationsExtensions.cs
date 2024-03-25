@@ -4,24 +4,27 @@ using Microsoft.OData.UriParser.Aggregation;
 #nullable disable
 namespace Nest.OData
 {
-    // todo check for complex properties or navigation properties
-
-    public static class ODataApplyToExtensions
+    /// <summary>
+    /// https://docs.oasis-open.org/odata/odata-data-aggregation-ext/v4.0/cs01/odata-data-aggregation-ext-v4.0-cs01.html
+    /// </summary>
+    public static class ODataAggregationsExtensions
     {
-        public static SearchDescriptor<T> ApplyTransformations<T>(this SearchDescriptor<T> searchDescriptor, ApplyQueryOption applyQueryOption) where T : class
+        public static SearchDescriptor<T> Aggregate<T>(this SearchDescriptor<T> searchDescriptor, ApplyQueryOption applyQueryOption) where T : class
         {
-            if (applyQueryOption != null && applyQueryOption.ApplyClause != null)
+            if (applyQueryOption == null || applyQueryOption.ApplyClause == null)
             {
-                foreach (var transformationNode in applyQueryOption.ApplyClause.Transformations)
+                return searchDescriptor;
+            }
+
+            foreach (var transformationNode in applyQueryOption.ApplyClause.Transformations)
+            {
+                searchDescriptor = transformationNode.Kind switch
                 {
-                    searchDescriptor = transformationNode.Kind switch
-                    {
-                        TransformationNodeKind.GroupBy => searchDescriptor.ApplyGroupBy(transformationNode as GroupByTransformationNode),
-                        TransformationNodeKind.Aggregate => searchDescriptor.ApplyAggregate(transformationNode as AggregateTransformationNode),
-                        TransformationNodeKind.Filter => searchDescriptor.Query(q => ODataFilterExtensions.TranslateExpression((transformationNode as FilterTransformationNode).FilterClause.Expression)),
-                        _ => searchDescriptor
-                    };
-                }
+                    TransformationNodeKind.GroupBy => searchDescriptor.ApplyGroupBy(transformationNode as GroupByTransformationNode),
+                    TransformationNodeKind.Aggregate => searchDescriptor.ApplyAggregate(transformationNode as AggregateTransformationNode),
+                    TransformationNodeKind.Filter => searchDescriptor.Query(q => ODataFilterExtensions.TranslateExpression((transformationNode as FilterTransformationNode).FilterClause.Expression)),
+                    _ => searchDescriptor
+                };
             }
 
             return searchDescriptor;

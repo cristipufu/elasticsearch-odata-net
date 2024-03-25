@@ -37,13 +37,26 @@ namespace Nest.OData.Tests
         {
             var settings = new ConnectionSettings(new SingleNodeConnectionPool(new Uri("http://localhost:9200")))
                 .DefaultIndex("dummy");
-            var elasticClient = new ElasticClient(settings);
+            var client = new ElasticClient(settings);
 
             using var stream = new MemoryStream();
-            elasticClient.RequestResponseSerializer.Serialize(new SearchRequest { Query = queryContainer }, stream);
+            client.RequestResponseSerializer.Serialize(new SearchRequest { Query = queryContainer }, stream);
             stream.Position = 0;
             using var reader = new StreamReader(stream);
             return reader.ReadToEnd();
+        }
+
+        public static string ToJson<T>(this SearchDescriptor<T> descriptor) where T : class
+        {
+            var settings = new ConnectionSettings(new SingleNodeConnectionPool(new Uri("http://localhost:9200")))
+                .DefaultIndex("dummy");
+            var client = new ElasticClient(settings);
+
+            using var stream = new MemoryStream();
+            client.RequestResponseSerializer.Serialize(descriptor, stream);
+            stream.Position = 0;
+            using var streamReader = new StreamReader(stream);
+            return streamReader.ReadToEnd();
         }
     }
 }

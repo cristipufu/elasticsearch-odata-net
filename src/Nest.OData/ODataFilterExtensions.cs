@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("Nest.OData.Tests")]
 
 #nullable disable
 namespace Nest.OData
 {
+    /// <summary>
+    /// https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html
+    /// </summary>
     public static class ODataFilterExtensions
     {
-        public static SearchDescriptor<T> ApplyFilter<T>(this SearchDescriptor<T> searchDescriptor, FilterQueryOption filter) where T : class
+        public static SearchDescriptor<T> Query<T>(this SearchDescriptor<T> searchDescriptor, FilterQueryOption filter) where T : class
         {
             if (filter?.FilterClause?.Expression == null)
             {
@@ -19,16 +19,12 @@ namespace Nest.OData
 
             var queryContainer = TranslateExpression(filter.FilterClause.Expression);
 
-            if (queryContainer != null)
+            if (queryContainer == null)
             {
-                searchDescriptor.Query(q => queryContainer);
-            }
-            else
-            {
-                searchDescriptor.MatchAll();
+                return searchDescriptor.MatchAll();
             }
 
-            return searchDescriptor;
+            return searchDescriptor.Query(q => queryContainer);
         }
 
         internal static QueryContainer TranslateExpression(QueryNode node, ODataExpressionContext context = null)

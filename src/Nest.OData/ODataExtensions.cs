@@ -8,18 +8,18 @@ namespace Nest.OData
         public static SearchDescriptor<T> ToElasticsearchQuery<T>(this ODataQueryOptions<T> queryOptions) where T : class
         {
             return new SearchDescriptor<T>()
-                .ApplyFilter(queryOptions.Filter)
-                .ApplyTransformations(queryOptions.Apply)
-                .ApplyOrderBy(queryOptions.OrderBy) 
-                .ApplySkip(queryOptions.Skip)
-                .ApplyTop(queryOptions.Top);
+                .Query(queryOptions.Filter)
+                .Aggregate(queryOptions.Apply)
+                .OrderBy(queryOptions.OrderBy) 
+                .Skip(queryOptions.Skip)
+                .Take(queryOptions.Top);
         }
 
-        public static SearchDescriptor<T> ApplyOrderBy<T>(this SearchDescriptor<T> searchDescriptor, OrderByQueryOption orderByQueryOption) where T : class
+        public static SearchDescriptor<T> OrderBy<T>(this SearchDescriptor<T> searchDescriptor, OrderByQueryOption orderByQueryOption) where T : class
         {
             // todo check for complex properties or navigation properties
 
-            if (orderByQueryOption == null || !orderByQueryOption.OrderByNodes.Any())
+            if (orderByQueryOption?.OrderByNodes == null || !orderByQueryOption.OrderByNodes.Any())
             {
                 return searchDescriptor;
             }
@@ -36,7 +36,7 @@ namespace Nest.OData
             return searchDescriptor;
         }
 
-        public static SearchDescriptor<T> ApplySkip<T>(this SearchDescriptor<T> searchDescriptor, SkipQueryOption skipQueryOption) where T : class
+        public static SearchDescriptor<T> Skip<T>(this SearchDescriptor<T> searchDescriptor, SkipQueryOption skipQueryOption) where T : class
         {
             if (skipQueryOption == null)
             {
@@ -46,7 +46,7 @@ namespace Nest.OData
             return searchDescriptor.From(skipQueryOption.Value);
         }
 
-        public static SearchDescriptor<T> ApplyTop<T>(this SearchDescriptor<T> searchDescriptor, TopQueryOption topQueryOption) where T : class
+        public static SearchDescriptor<T> Take<T>(this SearchDescriptor<T> searchDescriptor, TopQueryOption topQueryOption) where T : class
         {
             if (topQueryOption == null)
             {
