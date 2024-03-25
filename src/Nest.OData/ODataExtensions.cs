@@ -17,21 +17,24 @@ namespace Nest.OData
 
         public static SearchDescriptor<T> OrderBy<T>(this SearchDescriptor<T> searchDescriptor, OrderByQueryOption orderByQueryOption) where T : class
         {
-            // todo check for complex properties or navigation properties
-
             if (orderByQueryOption?.OrderByNodes == null || !orderByQueryOption.OrderByNodes.Any())
             {
                 return searchDescriptor;
             }
 
-            foreach (var node in orderByQueryOption.OrderByNodes)
+            searchDescriptor.Sort(s =>
             {
-                if (node is OrderByPropertyNode propertyNode)
+                foreach (var node in orderByQueryOption.OrderByNodes)
                 {
-                    var direction = propertyNode.Direction == OrderByDirection.Ascending ? SortOrder.Ascending : SortOrder.Descending;
-                    searchDescriptor.Sort(s => s.Field(f => f.Field(propertyNode.Property.Name).Order(direction)));
+                    if (node is OrderByPropertyNode propertyNode)
+                    {
+                        var direction = propertyNode.Direction == OrderByDirection.Ascending ? SortOrder.Ascending : SortOrder.Descending;
+
+                        s.Field(f => f.Field(propertyNode.Property.Name).Order(direction));
+                    }
                 }
-            }
+                return s;
+            });
 
             return searchDescriptor;
         }
