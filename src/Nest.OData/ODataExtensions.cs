@@ -10,6 +10,7 @@ namespace Nest.OData
             return new SearchDescriptor<T>()
                 .Query(queryOptions.Filter)
                 .Aggregate(queryOptions.Apply)
+                .Select(queryOptions.SelectExpand)
                 .OrderBy(queryOptions.OrderBy) 
                 .Skip(queryOptions.Skip)
                 .Take(queryOptions.Top);
@@ -71,6 +72,27 @@ namespace Nest.OData
             }
 
             return searchDescriptor.Size(topQueryOption.Value);
+        }
+    
+        public static SearchDescriptor<T> Select<T>(this SearchDescriptor<T> searchDescriptor, SelectExpandQueryOption selectQueryOption) where T : class
+        {
+            if (selectQueryOption?.SelectExpandClause == null)
+            {
+                return searchDescriptor;
+                
+            }
+
+            var selectedFields = selectQueryOption.SelectExpandClause.SelectedItems
+                    .OfType<PathSelectItem>()
+                    .Select(i => i.SelectedPath.FirstSegment.Identifier)
+                    .ToList();
+
+            if (selectedFields.Count == 0)
+            {
+                return searchDescriptor;
+            }
+
+            return searchDescriptor.Source(s => s.Includes(i => i.Fields(selectedFields.ToArray())));
         }
     }
 }
