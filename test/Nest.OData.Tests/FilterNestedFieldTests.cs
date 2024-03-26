@@ -224,7 +224,7 @@ namespace Nest.OData.Tests
         }
 
         [Fact]
-        public void NestedComplexTypeEqualsNull()
+        public void NestedComplexTypeFieldEqualsNull()
         {
             var queryOptions = "$filter=ProductDetail/Id eq null".GetODataQueryOptions<Product>();
 
@@ -261,7 +261,7 @@ namespace Nest.OData.Tests
         }
 
         [Fact]
-        public void NestedComplexTypeNotEqualsNull()
+        public void NestedComplexTypeFieldNotEqualsNull()
         {
             var queryOptions = "$filter=ProductDetail/Id ne null".GetODataQueryOptions<Product>();
 
@@ -279,6 +279,110 @@ namespace Nest.OData.Tests
                   ""query"": {
                     ""exists"": {
                       ""field"": ""ProductDetail.Id""
+                    }
+                  }
+                }
+              }
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
+        public void NestedComplexTypeNotEqualsNull()
+        {
+            var queryOptions = "$filter=ProductDetail ne null".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"{""query"":{""exists"":{""field"":""ProductDetail""}}}";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
+        public void NestedComplexTypeEqualsNull()
+        {
+            var queryOptions = "$filter=ProductDetail eq null".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"{""query"":{""bool"":{""must_not"":[{""exists"":{""field"":""ProductDetail""}}]}}}";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
+        public void NestedComplexTypeNestedFieldNotEqualsNull()
+        {
+            var queryOptions = "$filter=ProductDetail/ProductRating/Id ne null".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"{
+              ""query"": {
+                ""nested"": {
+                  ""path"": ""ProductDetail.ProductRating"",
+                  ""query"": {
+                    ""exists"": {
+                      ""field"": ""ProductDetail.ProductRating.Id""
+                    }
+                  }
+                }
+              }
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
+        public void NestedComplexTypeNestedFieldEqualsNull()
+        {
+            var queryOptions = "$filter=ProductDetail/ProductRating/Id eq null".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"{
+              ""query"": {
+                ""nested"": {
+                  ""path"": ""ProductDetail.ProductRating"",
+                  ""query"": {
+                    ""bool"": {
+                      ""must_not"": [
+                        {
+                          ""exists"": {
+                            ""field"": ""ProductDetail.ProductRating.Id""
+                          }
+                        }
+                      ]
                     }
                   }
                 }
