@@ -33,6 +33,8 @@ This extension supports a wide range of OData query functionalities, tailored sp
 - **Ordering** (`$orderby`): Support for sorting by multiple fields, including support for nested objects.
 - **Pagination** (`$skip` and `$top`): Implement pagination through Elasticsearch's `from` and `size` parameters.
 - **Aggregation** (`$apply`): Support for translating aggregation transformations, including `groupby` and aggregate functions like `sum`, `max`, `min`, `average`, and `countdistinct`.
+- **Selection** (`$select`): Ability to specify which fields to include in the response, reducing the payload size and focusing on the relevant data. 
+- **Expansion** (`$expand`): Support for applying additional `$filter` and `$select` conditions on complex nested objects.
 
 ### Supported OData Logical Operators
 - **`Equals`** (eq)
