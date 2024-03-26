@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.OData.Query;
+﻿using Elasticsearch.Net;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using System.Xml.Linq;
 
 #nullable disable
 namespace Nest.OData
@@ -134,8 +136,8 @@ namespace Nest.OData
             {
                 BinaryOperatorKind.And => AggregateAndOperations(node, context),
                 BinaryOperatorKind.Or => AggregateOrOperations(node, context),
-                BinaryOperatorKind.Equal => new TermQuery { Field = fullyQualifiedFieldName, Value = ExtractValue(node.Right) },
-                BinaryOperatorKind.NotEqual => !new TermQuery { Field = fullyQualifiedFieldName, Value = ExtractValue(node.Right) },
+                BinaryOperatorKind.Equal => TranslateEqual(node.Right, fullyQualifiedFieldName),
+                BinaryOperatorKind.NotEqual => TranslateNotEqual(node.Right, fullyQualifiedFieldName),
                 BinaryOperatorKind.GreaterThan => new TermRangeQuery { Field = fullyQualifiedFieldName, GreaterThan = ExtractStringValue(node.Right) },
                 BinaryOperatorKind.GreaterThanOrEqual => new TermRangeQuery { Field = fullyQualifiedFieldName, GreaterThanOrEqualTo = ExtractStringValue(node.Right) },
                 BinaryOperatorKind.LessThan => new TermRangeQuery { Field = fullyQualifiedFieldName, LessThan = ExtractStringValue(node.Right) },
@@ -233,6 +235,30 @@ namespace Nest.OData
                 kind == QueryNodeKind.CollectionNavigationNode;
         }
 
+        private static QueryContainer TranslateEqual(SingleValueNode node, string fieldName)
+        {
+            var value = ExtractValue(node);
+
+            if (value == null)
+            {
+                return !new ExistsQuery { Field = fieldName };
+            }
+
+            return new TermQuery { Field = fieldName, Value = value };
+        }
+
+        private static QueryContainer TranslateNotEqual(SingleValueNode node, string fieldName)
+        {
+            var value = ExtractValue(node);
+
+            if (value == null)
+            {
+                return new ExistsQuery { Field = fieldName };
+            }
+
+            return !new TermQuery { Field = fieldName, Value = value };
+        }
+
         private static string ExtractFullyQualifiedFieldName(QueryNode node, string prefix = null)
         {
             var segments = new List<string>();
@@ -298,6 +324,10 @@ namespace Nest.OData
 
                 return constantNode.Value;
             }
+            else if (node is ConvertNode convertNode)
+            {
+                return ExtractValue(convertNode.Source);
+            }
 
             throw new NotImplementedException("Complex values are not supported yet.");
         }
@@ -307,6 +337,10 @@ namespace Nest.OData
             if (node is ConstantNode constantNode)
             {
                 return constantNode.Value?.ToString();
+            }
+            else if (node is ConvertNode convertNode)
+            {
+                return ExtractStringValue(convertNode.Source);
             }
 
             throw new NotImplementedException("Complex values are not supported yet.");
