@@ -143,7 +143,7 @@ namespace Nest.OData
                 _ => throw new NotImplementedException($"Unsupported binary operator: {node.OperatorKind}"),
             };
 
-            if (node.Left is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
+            if (NormalizeNode(node.Left) is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
             {
                 return new NestedQuery
                 {
@@ -251,6 +251,16 @@ namespace Nest.OData
             return !new TermQuery { Field = fieldName, Value = value };
         }
 
+        private static SingleValueNode NormalizeNode(SingleValueNode node)
+        {
+            if (node is ConvertNode convertNode)
+            {
+                return convertNode.Source;
+            }
+
+            return node;
+        }
+
         private static bool IsNavigationNode(QueryNodeKind kind)
         {
             return kind == QueryNodeKind.SingleNavigationNode ||
@@ -280,6 +290,9 @@ namespace Nest.OData
                     case CollectionNavigationNode collectionNavigationNode:
                         segments.Insert(0, collectionNavigationNode.NavigationProperty.Name);
                         ProcessNode(collectionNavigationNode.Source);
+                        break;
+                    case ConvertNode convertNode:
+                        ProcessNode(convertNode.Source);
                         break;
                 }
             }
