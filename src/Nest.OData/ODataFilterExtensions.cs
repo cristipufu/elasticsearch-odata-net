@@ -1,8 +1,6 @@
-﻿using Elasticsearch.Net;
-using Microsoft.AspNetCore.OData.Query;
+﻿using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using System.Xml.Linq;
 
 #nullable disable
 namespace Nest.OData
@@ -134,10 +132,10 @@ namespace Nest.OData
 
             var query = node.OperatorKind switch
             {
-                BinaryOperatorKind.And => AggregateAndOperations(node, context),
-                BinaryOperatorKind.Or => AggregateOrOperations(node, context),
-                BinaryOperatorKind.Equal => TranslateEqual(node.Right, fullyQualifiedFieldName),
-                BinaryOperatorKind.NotEqual => TranslateNotEqual(node.Right, fullyQualifiedFieldName),
+                BinaryOperatorKind.And => TranslateAndOperations(node, context),
+                BinaryOperatorKind.Or => TranslateOrOperations(node, context),
+                BinaryOperatorKind.Equal => TranslateEqualOperation(node.Right, fullyQualifiedFieldName),
+                BinaryOperatorKind.NotEqual => TranslateNotEqualOperation(node.Right, fullyQualifiedFieldName),
                 BinaryOperatorKind.GreaterThan => new TermRangeQuery { Field = fullyQualifiedFieldName, GreaterThan = ExtractStringValue(node.Right) },
                 BinaryOperatorKind.GreaterThanOrEqual => new TermRangeQuery { Field = fullyQualifiedFieldName, GreaterThanOrEqualTo = ExtractStringValue(node.Right) },
                 BinaryOperatorKind.LessThan => new TermRangeQuery { Field = fullyQualifiedFieldName, LessThan = ExtractStringValue(node.Right) },
@@ -185,7 +183,7 @@ namespace Nest.OData
             return query;
         }
 
-        private static QueryContainer AggregateOrOperations(BinaryOperatorNode node, ODataExpressionContext context = null)
+        private static QueryContainer TranslateOrOperations(BinaryOperatorNode node, ODataExpressionContext context = null)
         {
             var queries = new List<QueryContainer>();
 
@@ -207,7 +205,7 @@ namespace Nest.OData
             return new BoolQuery { Should = queries, MinimumShouldMatch = 1 };
         }
 
-        private static QueryContainer AggregateAndOperations(BinaryOperatorNode node, ODataExpressionContext context = null)
+        private static QueryContainer TranslateAndOperations(BinaryOperatorNode node, ODataExpressionContext context = null)
         {
             var queries = new List<QueryContainer>();
 
@@ -229,13 +227,7 @@ namespace Nest.OData
             return new BoolQuery { Must = queries };
         }
 
-        private static bool IsNavigationNode(QueryNodeKind kind)
-        {
-            return kind == QueryNodeKind.SingleNavigationNode ||
-                kind == QueryNodeKind.CollectionNavigationNode;
-        }
-
-        private static QueryContainer TranslateEqual(SingleValueNode node, string fieldName)
+        private static QueryContainer TranslateEqualOperation(SingleValueNode node, string fieldName)
         {
             var value = ExtractValue(node);
 
@@ -247,7 +239,7 @@ namespace Nest.OData
             return new TermQuery { Field = fieldName, Value = value };
         }
 
-        private static QueryContainer TranslateNotEqual(SingleValueNode node, string fieldName)
+        private static QueryContainer TranslateNotEqualOperation(SingleValueNode node, string fieldName)
         {
             var value = ExtractValue(node);
 
@@ -257,6 +249,12 @@ namespace Nest.OData
             }
 
             return !new TermQuery { Field = fieldName, Value = value };
+        }
+
+        private static bool IsNavigationNode(QueryNodeKind kind)
+        {
+            return kind == QueryNodeKind.SingleNavigationNode ||
+                kind == QueryNodeKind.CollectionNavigationNode;
         }
 
         private static string ExtractFullyQualifiedFieldName(QueryNode node, string prefix = null)
