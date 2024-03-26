@@ -7,12 +7,12 @@ namespace Nest.OData
         public static SearchDescriptor<T> ToElasticQuery<T>(this ODataQueryOptions<T> queryOptions) where T : class
         {
             return new SearchDescriptor<T>()
-                .Query(queryOptions.Filter)
+                .Filter(queryOptions.Filter)
                 .SelectExpand(queryOptions.SelectExpand)
-                .Aggregate(queryOptions.Apply)
+                .Apply(queryOptions.Apply)
                 .OrderBy(queryOptions.OrderBy) 
                 .Skip(queryOptions.Skip)
-                .Take(queryOptions.Top);
+                .Top(queryOptions.Top);
         }
     }
 }

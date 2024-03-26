@@ -7,7 +7,7 @@ namespace Nest.OData.Tests
     public class OrderByTests
     {
         [Fact]
-        public void SkipTakeOrderByDesc()
+        public void SkipTopOrderByDesc()
         {
             var queryOptions = "$skip=10&$top=20&$orderby=CreatedDate desc".GetODataQueryOptions<Product>();
 

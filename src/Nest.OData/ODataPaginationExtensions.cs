@@ -14,7 +14,7 @@ namespace Nest.OData
             return searchDescriptor.From(skipQueryOption.Value);
         }
 
-        public static SearchDescriptor<T> Take<T>(this SearchDescriptor<T> searchDescriptor, TopQueryOption topQueryOption) where T : class
+        public static SearchDescriptor<T> Top<T>(this SearchDescriptor<T> searchDescriptor, TopQueryOption topQueryOption) where T : class
         {
             if (topQueryOption == null)
             {

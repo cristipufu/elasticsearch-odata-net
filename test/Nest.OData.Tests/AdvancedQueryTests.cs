@@ -160,7 +160,7 @@ namespace Nest.OData.Tests
         }
 
         [Fact]
-        public void MultipleExpandSelectMultipleSkipTake()
+        public void MultipleExpandSelectMultipleSkipTop()
         {
             var queryOptions = "$expand=ProductDetail($expand=ProductRating)&$filter=Color eq 'Red'&$select=Id,Name,CreatedDate,Color&$top=100&$skip=10"
                 .GetODataQueryOptions<Product>();
@@ -199,7 +199,7 @@ namespace Nest.OData.Tests
         }
 
         [Fact]
-        public void MultipleFiltersStartsWithSkipTakeOrderBy()
+        public void MultipleFiltersStartsWithSkipTopOrderBy()
         {
             var queryOptions = "$filter=Id eq 123 and ((Color eq 'Red') or (Color eq 'Green')) and startswith(Name,'abc')&$top=10&$skip=20&$orderby=CreatedDate desc"
                 .GetODataQueryOptions<Product>();
@@ -339,5 +339,70 @@ namespace Nest.OData.Tests
 
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
+
+        [Fact]
+        public void ExpandMultipleSelectMultipleNestFilterSkipTop()
+        {
+            var queryOptions = "$expand=ProductDetail($expand=ProductRating)&$filter=(Color eq 'Red') and (Category eq 'Goods') and ProductDetail/Id eq 123&$select=Id,Name,Category&$top=5&$skip=5"
+                .GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"
+            {
+              ""from"": 5,
+              ""query"": {
+                ""bool"": {
+                  ""must"": [
+                    {
+                      ""term"": {
+                        ""Color"": {
+                          ""value"": ""Red""
+                        }
+                      }
+                    },
+                    {
+                      ""term"": {
+                        ""Category"": {
+                          ""value"": ""Goods""
+                        }
+                      }
+                    },
+                    {
+                      ""nested"": {
+                        ""path"": ""ProductDetail"",
+                        ""query"": {
+                          ""term"": {
+                            ""ProductDetail.Id"": {
+                              ""value"": 123
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              ""size"": 5,
+              ""_source"": {
+                ""includes"": [
+                  ""Id"",
+                  ""Name"",
+                  ""Category""
+                ]
+              }
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        // 
     }
 }

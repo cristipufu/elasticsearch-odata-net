@@ -9,7 +9,7 @@ namespace Nest.OData
     /// </summary>
     public static class ODataAggregationExtensions
     {
-        public static SearchDescriptor<T> Aggregate<T>(this SearchDescriptor<T> searchDescriptor, ApplyQueryOption applyQueryOption) where T : class
+        public static SearchDescriptor<T> Apply<T>(this SearchDescriptor<T> searchDescriptor, ApplyQueryOption applyQueryOption) where T : class
         {
             if (applyQueryOption == null || applyQueryOption.ApplyClause == null)
             {

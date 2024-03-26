@@ -10,7 +10,7 @@ namespace Nest.OData
     /// </summary>
     public static class ODataFilterExtensions
     {
-        public static SearchDescriptor<T> Query<T>(this SearchDescriptor<T> searchDescriptor, FilterQueryOption filter) where T : class
+        public static SearchDescriptor<T> Filter<T>(this SearchDescriptor<T> searchDescriptor, FilterQueryOption filter) where T : class
         {
             if (filter?.FilterClause?.Expression == null)
             {
@@ -143,7 +143,7 @@ namespace Nest.OData
                 _ => throw new NotImplementedException($"Unsupported binary operator: {node.OperatorKind}"),
             };
 
-            if (NormalizeNode(node.Left) is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
+            if (ExtractSourceNode(node.Left) is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
             {
                 return new NestedQuery
                 {
@@ -251,7 +251,13 @@ namespace Nest.OData
             return !new TermQuery { Field = fieldName, Value = value };
         }
 
-        private static SingleValueNode NormalizeNode(SingleValueNode node)
+        private static bool IsNavigationNode(QueryNodeKind kind)
+        {
+            return kind == QueryNodeKind.SingleNavigationNode ||
+                kind == QueryNodeKind.CollectionNavigationNode;
+        }
+
+        private static SingleValueNode ExtractSourceNode(SingleValueNode node)
         {
             if (node is ConvertNode convertNode)
             {
@@ -259,12 +265,6 @@ namespace Nest.OData
             }
 
             return node;
-        }
-
-        private static bool IsNavigationNode(QueryNodeKind kind)
-        {
-            return kind == QueryNodeKind.SingleNavigationNode ||
-                kind == QueryNodeKind.CollectionNavigationNode;
         }
 
         private static string ExtractFullyQualifiedFieldName(QueryNode node, string prefix = null)
