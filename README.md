@@ -5,21 +5,34 @@ This project bridges the gap between the flexibility of OData queries and the po
 To start using this extension, include it in your project and configure it to point to your Elasticsearch instance. Here's a quick example:
 
 ```csharp
-// Assuming you have an ODataQueryOptions instance from an ASP.NET Core controller
-var queryOptions = ...; 
+[HttpGet]
+public async Task<IActionResult> Get(ODataQueryOptions<Document> queryOptions)
+{
+    var searchDescriptor = queryOptions.ToElasticQuery<Document>();
 
-// Convert OData query options to an Elasticsearch query container
-var queryContainer = queryOptions.ToQueryContainer<Document>();
+    var response = await _elasticClient.SearchAsync<Document>(searchDescriptor);
 
-// Execute the query against your Elasticsearch index
-var searchResponse = await elasticClient
-        .SearchAsync<Document>(s => s.Query(q => queryContainer)
-);
+    if (response.IsValid)
+    {
+        return Ok(response.Documents);
+    }
+    else
+    {
+        return BadRequest();
+    }
+}
 ```
 Replace `Document` with your document class that maps to your Elasticsearch index.
 
 ## Features
 This extension supports a wide range of OData query functionalities, tailored specifically for Elasticsearch's query DSL. Here's what you can do:
+
+### Supported Features
+
+- **Filtering** (`$filter`): Translate OData filters into Elasticsearch query DSL, supporting logical operators, comparison operations, and some basic functions.
+- **Ordering** (`$orderby`): Support for sorting by multiple fields, including support for nested objects.
+- **Pagination** (`$skip` and `$top`): Implement pagination through Elasticsearch's `from` and `size` parameters.
+- **Aggregation** (`$apply`): Support for translating aggregation transformations, including `groupby` and aggregate functions like `sum`, `max`, `min`, `average`, and `countdistinct`.
 
 ### Supported OData Logical Operators
 - **`Equals`** (eq)
