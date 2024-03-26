@@ -12,16 +12,16 @@ namespace Nest.OData
                 return searchDescriptor;
             }
 
-            // $select 
             var selectedFields = selectExpandQueryOption.SelectExpandClause.SelectedItems
                 .OfType<PathSelectItem>()
                 .Select(i => i.SelectedPath.FirstSegment.Identifier)
                 .ToList();
 
-            // $expand
             var expands = selectExpandQueryOption.SelectExpandClause.SelectedItems
                 .OfType<ExpandedNavigationSelectItem>()
                 .ToList();
+
+            var queries = new List<QueryContainer>();
 
             foreach (var expand in expands)
             {
@@ -34,7 +34,7 @@ namespace Nest.OData
                         PathPrefix = navigationPropertyName,
                     });
 
-                    searchDescriptor.Query(q => new NestedQuery
+                    queries.Add(new NestedQuery
                     {
                         Path = navigationPropertyName,
                         Query = queryContainer,
@@ -56,7 +56,17 @@ namespace Nest.OData
                 searchDescriptor = searchDescriptor.Source(s => s.Includes(i => i.Fields(selectedFields.ToArray())));
             }
 
-            return searchDescriptor;
+            if (queries.Count == 0)
+            {
+                return searchDescriptor;
+                
+            }
+            if (queries.Count == 1)
+            {
+                return searchDescriptor.Query(q => queries.First());
+            }
+
+            return searchDescriptor = searchDescriptor.Query(q => new BoolQuery { Must = queries });
         }
     }
 }
