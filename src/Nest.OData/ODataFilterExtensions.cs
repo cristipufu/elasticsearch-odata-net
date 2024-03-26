@@ -347,7 +347,18 @@ namespace Nest.OData
         {
             if (node is ConstantNode constantNode)
             {
-                return constantNode.Value?.ToString();
+                if (constantNode.Value is DateTime dateTime)
+                {
+                    return dateTime.ToString("o"); 
+                }
+                else if (constantNode.Value is DateTimeOffset dateTimeOffset)
+                {
+                    return dateTimeOffset.ToString("o");
+                }
+                else
+                {
+                    return constantNode.Value?.ToString();
+                }
             }
             else if (node is ConvertNode convertNode)
             {
