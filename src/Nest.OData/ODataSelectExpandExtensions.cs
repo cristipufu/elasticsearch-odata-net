@@ -26,11 +26,29 @@ namespace Nest.OData
             foreach (var expand in expands)
             {
                 var navigationPropertyName = expand.PathToNavigationProperty.FirstSegment.Identifier;
-                var nestedSelects = expand.SelectAndExpand.SelectedItems
-                    .OfType<PathSelectItem>()
-                    .Select(i => $"{navigationPropertyName}.{i.SelectedPath.FirstSegment.Identifier}")
-                    .ToList();
-                selectedFields.AddRange(nestedSelects);
+
+                if (expand.FilterOption != null)
+                {
+                    var queryContainer = ODataFilterExtensions.TranslateExpression(expand.FilterOption.Expression, new ODataExpressionContext
+                    {
+                        PathPrefix = navigationPropertyName,
+                    });
+
+                    searchDescriptor.Query(q => new NestedQuery
+                    {
+                        Path = navigationPropertyName,
+                        Query = queryContainer,
+                    });
+                }
+                else
+                {
+                    var nestedSelects = expand.SelectAndExpand.SelectedItems
+                        .OfType<PathSelectItem>()
+                        .Select(i => $"{navigationPropertyName}.{i.SelectedPath.FirstSegment.Identifier}")
+                        .ToList();
+
+                    selectedFields.AddRange(nestedSelects);
+                }
             }
 
             if (selectedFields.Count > 0)

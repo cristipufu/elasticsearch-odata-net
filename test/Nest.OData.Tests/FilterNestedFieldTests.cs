@@ -24,7 +24,7 @@ namespace Nest.OData.Tests
                   ""path"": ""ProductDetail"",
                   ""query"": {
                     ""wildcard"": {
-                      ""Info"": {
+                      ""ProductDetail.Info"": {
                         ""value"": ""*searchTerm*""
                       }
                     }
@@ -57,7 +57,7 @@ namespace Nest.OData.Tests
                   ""path"": ""ProductDetail.ProductRating"",
                   ""query"": {
                     ""range"": {
-                      ""Rating"": {  
+                      ""ProductDetail.ProductRating.Rating"": {  
                         ""gt"": ""1""
                       }
                     }
@@ -110,7 +110,7 @@ namespace Nest.OData.Tests
                   ""path"": ""ProductDetail"",
                   ""query"": {
                     ""term"": {
-                      ""Tags"": {
+                      ""ProductDetail.Tags"": {
                         ""value"": ""Electronics""
                       }
                     }
@@ -140,7 +140,7 @@ namespace Nest.OData.Tests
                         ""path"": ""ProductSuppliers"",
                         ""query"": {
                         ""term"": {
-                            ""Name"": {
+                            ""ProductSuppliers.Name"": {
                             ""value"": ""Electronics""
                             }
                         }
@@ -171,7 +171,7 @@ namespace Nest.OData.Tests
                   ""path"": ""ProductDetail"",
                   ""query"": {
                     ""terms"": {
-                      ""Id"": [123, 456]
+                      ""ProductDetail.Id"": [123, 456]
                     }
                   }
                 }
@@ -208,7 +208,7 @@ namespace Nest.OData.Tests
                             ""must_not"": [
                               {
                                 ""term"": {
-                                  ""Tags"": {
+                                  ""ProductDetail.Tags"": {
                                     ""value"": ""Electronics""
                                   }
                                 }
