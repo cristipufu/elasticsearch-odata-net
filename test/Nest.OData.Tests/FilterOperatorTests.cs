@@ -344,5 +344,33 @@ namespace Nest.OData.Tests
 
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
+
+        [Fact]
+        public void EqualsGuid()
+        {
+            var queryOptions = "$filter=Key eq 12345678-1234-1234-1234-123456789abc".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"
+            {
+              ""query"": {
+                ""term"": {
+                  ""Key"": {
+                    ""value"": ""12345678-1234-1234-1234-123456789abc""
+                  }
+                }
+              }
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
     }
 }

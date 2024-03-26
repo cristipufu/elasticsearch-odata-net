@@ -4,6 +4,7 @@ namespace Nest.OData.Tests.Common
     public class Product
     {
         public int Id { get; set; }
+        public Guid Key { get; set; }
         public string Category { get; set; }
         public string Name { get; set; }
         public Color Color { get; set; }

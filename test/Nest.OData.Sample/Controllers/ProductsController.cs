@@ -19,6 +19,7 @@ namespace Nest.OData.Sample.Controllers
                 var prod = new Product()
                 {
                     Id = i,
+                    Key = Guid.NewGuid(),
                     Category = "Goods" + i,
                     Color = Color.Red,
                     Tags = ["Electronics", "Food", "Plants"],
