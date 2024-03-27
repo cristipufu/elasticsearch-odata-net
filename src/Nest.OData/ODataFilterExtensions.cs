@@ -294,15 +294,12 @@ namespace Nest.OData
                     case ConvertNode convertNode:
                         ProcessNode(convertNode.Source);
                         break;
+                    default:
+                        break;
                 }
             }
 
             ProcessNode(node);
-
-            if (segments.Count == 0)
-            {
-                return prefix;
-            }
 
             if (prefix != null)
             {

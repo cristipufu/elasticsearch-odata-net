@@ -41,7 +41,7 @@ namespace Nest.OData
             {
                 if (node.Expression == null)
                 {
-                    var childNode = node.ChildTransformations.First();
+                    var childNode = node.ChildTransformations[0];
 
                     return new AggregationContainerDescriptor<T>().Nested($"nested_{node.Name}_{childNode.Name}", n => n
                         .Path(node.Name)

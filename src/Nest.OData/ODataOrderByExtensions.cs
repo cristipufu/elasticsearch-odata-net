@@ -25,15 +25,11 @@ namespace Nest.OData
                     {
                         s.Field(f => f.Field(propertyNode.Property.Name).Order(GetSortOrder(propertyNode.Direction)));
                     }
-                    else if (node is OrderByOpenPropertyNode openPropertyNode)
+                    else if (node is OrderByOpenPropertyNode openPropertyNode &&
+                        openPropertyNode.OrderByClause.Expression is SingleValueOpenPropertyAccessNode singleValueNode && 
+                        singleValueNode.Source is SingleValueOpenPropertyAccessNode source)
                     {
-                        if (openPropertyNode.OrderByClause.Expression is SingleValueOpenPropertyAccessNode singleValueNode)
-                        {
-                            if (singleValueNode.Source is SingleValueOpenPropertyAccessNode source)
-                            {
-                                s.Field(f => f.Field($"{source.Name}.{singleValueNode.Name}").Order(GetSortOrder(node.Direction)).Nested(n => n.Path(source.Name)));
-                            }
-                        }
+                        s.Field(f => f.Field($"{source.Name}.{singleValueNode.Name}").Order(GetSortOrder(node.Direction)).Nested(n => n.Path(source.Name)));
                     }
                 }
 

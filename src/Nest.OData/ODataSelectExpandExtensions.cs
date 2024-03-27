@@ -63,10 +63,10 @@ namespace Nest.OData
             }
             if (queries.Count == 1)
             {
-                return searchDescriptor.Query(q => queries.First());
+                return searchDescriptor.Query(q => queries[0]);
             }
 
-            return searchDescriptor = searchDescriptor.Query(q => new BoolQuery { Must = queries });
+            return searchDescriptor.Query(q => new BoolQuery { Must = queries });
         }
     }
 }

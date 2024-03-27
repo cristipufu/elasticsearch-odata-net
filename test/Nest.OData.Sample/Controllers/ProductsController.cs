@@ -62,7 +62,7 @@ namespace Nest.OData.Sample.Controllers
         [HttpGet]
         public IActionResult Get(ODataQueryOptions<Product> queryOptions)
         {
-            var elasticQuery = queryOptions.ToElasticQuery();
+            var _ = queryOptions.ToElasticQuery();
 
             return Ok(products);
         }
