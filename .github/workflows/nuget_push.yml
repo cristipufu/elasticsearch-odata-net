@@ -1,0 +1,26 @@
+name: NuGet Push
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Update NuGet package
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Setup .NET Core @ Latest
+        uses: actions/setup-dotnet@v3     
+        with:
+            dotnet-version: '8.0.x'  
+
+      - name: Build and Publish
+        run: |  
+          cd ./src/Nest.OData/
+          dotnet pack -c Release -o artifacts -p:PackageVersion=1.0.0
+
+      - name: Push
+        run: dotnet nuget push ./src/Nest.OData/artifacts/Nest.OData.1.0.0.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
