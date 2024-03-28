@@ -1,5 +1,9 @@
 ﻿using Microsoft.OData.Edm;
+#if USE_ODATA_V7
+using Microsoft.AspNet.OData.Builder;
+#else
 using Microsoft.OData.ModelBuilder;
+#endif
 
 namespace Nest.OData.Tests.Common
 {
@@ -12,10 +16,7 @@ namespace Nest.OData.Tests.Common
             builder.EntitySet<Supplier>("Suppliers");
             builder.EntitySet<Order>("Orders");
 
-            var model = builder.GetEdmModel();
-            model.MarkAsImmutable();
-
-            return model;
+            return builder.GetEdmModel();
         }
     }
 }

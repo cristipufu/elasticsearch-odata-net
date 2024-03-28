@@ -1,11 +1,20 @@
 ﻿using Elasticsearch.Net;
 using Microsoft.AspNetCore.Http;
+#if USE_ODATA_V7
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Extensions;
+#else
 using Microsoft.AspNetCore.OData.Abstracts;
 using Microsoft.AspNetCore.OData.Query;
-using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Moq;
+#endif
+using Microsoft.OData.Edm;
 using Nest.OData.Tests.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
+using Moq;
 
 namespace Nest.OData.Tests
 {
@@ -13,14 +22,23 @@ namespace Nest.OData.Tests
     {
         public static IServiceProvider GetServiceProvider(this IEdmModel edmModel)
         {
+#if USE_ODATA_V7
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddOData();
+            services.AddSingleton(edmModel);
+            var serviceProvider = services.BuildServiceProvider();
+            var routeBuilder = new RouteBuilder(Mock.Of<IApplicationBuilder>(x => x.ApplicationServices == serviceProvider));
+            routeBuilder.EnableDependencyInjection();
+            return serviceProvider;
+#else
             var mockServiceProvider = new Mock<IServiceProvider>();
             var mockODataFeature = new Mock<IODataFeature>();
-
             mockODataFeature.Setup(o => o.Model).Returns(edmModel);
             mockServiceProvider.Setup(s => s.GetService(typeof(IODataFeature)))
                 .Returns(mockODataFeature.Object);
-
             return mockServiceProvider.Object;
+#endif
         }
 
         public static ODataQueryOptions<T> GetODataQueryOptions<T>(this string queryString)
@@ -29,8 +47,11 @@ namespace Nest.OData.Tests
             var context = new DefaultHttpContext();
             context.Request.QueryString = new QueryString($"?&{queryString}");
             context.RequestServices = edmModel.GetServiceProvider();
-
+#if USE_ODATA_V7
+            return new ODataQueryOptions<T>(new ODataQueryContext(edmModel, typeof(T), new Microsoft.AspNet.OData.Routing.ODataPath()), context.Request);
+#else
             return new ODataQueryOptions<T>(new ODataQueryContext(edmModel, typeof(T), new ODataPath()), context.Request);
+#endif
         }
 
         public static string ToJson(this QueryContainer queryContainer)

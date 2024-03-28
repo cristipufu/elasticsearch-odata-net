@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.OData.Query;
+﻿#if USE_ODATA_V7
+using Microsoft.AspNet.OData.Query;
+#else
+using Microsoft.AspNetCore.OData.Query;
+#endif
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -76,12 +80,13 @@ namespace Nest.OData
 
             var query = new BoolQuery
             {
-                MustNot = [
+                MustNot = new List<QueryContainer>
+                {
                     !TranslateExpression(node.Body, new ODataExpressionContext
                     {
                         PathPrefix = fullyQualifiedFieldName,
                     })
-                ]
+                }
             };
 
             if (isNavigationProperty)
