@@ -38,12 +38,14 @@ app.UseHttpsRedirection();
 
 #if USE_ODATA_V7
 app.UseRouting();
+#pragma warning disable ASP0014 // Suggest using top level route registrations
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
     endpoints.Select().Filter().OrderBy().Count().MaxTop(10);
     endpoints.MapODataRoute("odata", "odata", EdmModelBuilder.GetEdmModel());
 });
+#pragma warning restore ASP0014 // Suggest using top level route registrations
 #else
 app.MapControllers();
 #endif

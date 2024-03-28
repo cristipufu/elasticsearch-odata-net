@@ -82,13 +82,13 @@ namespace Nest.OData
 
             var query = new BoolQuery
             {
-                MustNot = new List<QueryContainer>
-                {
+                MustNot =
+                [
                     !TranslateExpression(node.Body, new ODataExpressionContext
                     {
                         PathPrefix = fullyQualifiedFieldName,
                     })
-                }
+                ]
             };
 
             if (isNavigationProperty)

@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 #else
 using Microsoft.AspNetCore.OData.Abstracts;
 using Microsoft.AspNetCore.OData.Query;
@@ -11,9 +14,6 @@ using Microsoft.OData.UriParser;
 #endif
 using Microsoft.OData.Edm;
 using Nest.OData.Tests.Common;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
 using Moq;
 
 namespace Nest.OData.Tests
