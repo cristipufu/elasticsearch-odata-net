@@ -4,10 +4,19 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;Release_V7</Configurations>
   </PropertyGroup>
 
-  <ItemGroup>
-	<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.2.5" />
+  <PropertyGroup Condition="'$(Configuration)'=='Release_V7'">
+    <DefineConstants>$(DefineConstants);USE_ODATA_V7</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Release_V7'">
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="7.5.12" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.2.5" />
   </ItemGroup>
 
 </Project>

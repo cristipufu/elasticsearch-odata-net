@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
+#if USE_ODATA_V7
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData;
+#else
 using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
+#endif
 using Nest.OData.Tests.Common;
 
 namespace Nest.OData.Sample.Controllers
 {
-    public class ProductsController : ODataController
+    public class ProductsController : ControllerBase
     {
         private readonly IList<Product> products;
         private static readonly string[] value = ["Leonard G. Lobel", "Eric D. Boyd"];
@@ -26,7 +30,8 @@ namespace Nest.OData.Sample.Controllers
                     CreatedDate = new DateTimeOffset(2001, 4, 15, 16, 24, 8, TimeSpan.FromHours(-8)),
                     UpdatedDate = new DateTimeOffset(2011, 2, 15, 16, 24, 8, TimeSpan.FromHours(-8)),
                     ProductDetail = new ProductDetail { Id = i, Info = "Info" + i },
-                    ProductOrders = [
+                    ProductOrders =
+                    [
                         new Order
                         {
                             Id = i,
@@ -60,9 +65,10 @@ namespace Nest.OData.Sample.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get(ODataQueryOptions<Product> queryOptions)
+        [EnableQuery]
+        public ActionResult<IEnumerable<Product>> Get(ODataQueryOptions<Product> queryOptions)
         {
-            var _ = queryOptions.ToElasticQuery();
+            queryOptions.ToElasticQuery();
 
             return Ok(products);
         }

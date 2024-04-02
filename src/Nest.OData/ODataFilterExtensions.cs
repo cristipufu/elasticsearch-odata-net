@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.OData.Query;
+﻿#if USE_ODATA_V7
+using Microsoft.AspNet.OData.Query;
+using Microsoft.OData;
+#else
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.OData;
+#endif
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -76,7 +82,8 @@ namespace Nest.OData
 
             var query = new BoolQuery
             {
-                MustNot = [
+                MustNot =
+                [
                     !TranslateExpression(node.Body, new ODataExpressionContext
                     {
                         PathPrefix = fullyQualifiedFieldName,
@@ -325,9 +332,9 @@ namespace Nest.OData
         {
             if (node is ConstantNode constantNode)
             {
-                if (constantNode.TypeReference is IEdmEnumTypeReference)
+                if (constantNode.TypeReference?.Definition?.TypeKind is EdmTypeKind.Enum)
                 {
-                    return constantNode.Value?.ToString();
+                    return (constantNode.Value as ODataEnumValue).Value?.ToString();
                 }
 
                 return constantNode.Value;

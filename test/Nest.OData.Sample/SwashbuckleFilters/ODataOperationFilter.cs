@@ -7,7 +7,7 @@ namespace Nest.OData.Sample.SwashbuckleFilters
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            operation.Parameters ??= [];
+            operation.Parameters ??= new List<OpenApiParameter>();
 
             var odataParams = new List<OpenApiParameter>
             {

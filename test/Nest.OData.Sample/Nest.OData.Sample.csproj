@@ -4,10 +4,23 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Configurations>Debug;Release;Release_V7</Configurations>
   </PropertyGroup>
 
-  <ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release_V7'">
+    <DefineConstants>$(DefineConstants);USE_ODATA_V7</DefineConstants>
+  </PropertyGroup>
+	
+  <ItemGroup Condition="'$(Configuration)'=='Release_V7'">
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="7.5.12" />
+    <PackageReference Include="Microsoft.AspNetCore.OData.Versioning.ApiExplorer" Version="4.1.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.2.5" />
+  </ItemGroup>
+	
+  <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 

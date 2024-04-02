@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.OData.Query;
+﻿#if USE_ODATA_V7
+using Microsoft.AspNet.OData.Query;
+#else
+using Microsoft.AspNetCore.OData.Query;
+#endif
 using Microsoft.OData.UriParser.Aggregation;
 
 #nullable disable
