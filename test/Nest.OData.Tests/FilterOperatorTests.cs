@@ -73,6 +73,25 @@ namespace Nest.OData.Tests
         }
 
         [Fact]
+        public void InOperatorEnum()
+        {
+            var queryOptions = "$filter=Color in ('Red', 'Green')".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"{""query"":{""terms"":{""Color"":[""Red"",""Green""]}}}";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
         public void EqOperatorWithEnumAsStringProperty()
         {
             var queryOptions = "$filter=Color eq 'Red'".GetODataQueryOptions<Product>();

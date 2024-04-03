@@ -116,7 +116,9 @@ namespace Nest.OData
 
             foreach (var item in collectionNode.Collection)
             {
-                values.Add(item.Value);
+                var value = ExtractValue(item);
+
+                values.Add(value);
             }
 
             var query = new TermsQuery { Field = fullyQualifiedFieldName, Terms = values };
