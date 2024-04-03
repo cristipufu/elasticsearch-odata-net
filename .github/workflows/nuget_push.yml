@@ -20,15 +20,15 @@ jobs:
       - name: Build and Publish
         run: |  
           cd ./src/Nest.OData/
-          dotnet pack -c Release -o artifacts -p:PackageVersion=1.0.1
+          dotnet pack -c Release -o artifacts -p:PackageVersion=1.0.2
 
       - name: Push
-        run: dotnet nuget push ./src/Nest.OData/artifacts/Nest.OData.1.0.1.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./src/Nest.OData/artifacts/Nest.OData.1.0.2.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
         
       - name: Build and Publish v7
         run: |  
           cd ./src/Nest.OData/
-          dotnet pack -c Release_V7 -o artifacts_v7 -p:PackageVersion=1.0.1 -p:PackageId=Nest.OData.v7
+          dotnet pack -c Release_V7 -o artifacts_v7 -p:PackageVersion=1.0.2 -p:PackageId=Nest.OData.v7
 
       - name: Push v7
-        run: dotnet nuget push ./src/Nest.OData/artifacts_v7/Nest.OData.v7.1.0.1.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./src/Nest.OData/artifacts_v7/Nest.OData.v7.1.0.2.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
