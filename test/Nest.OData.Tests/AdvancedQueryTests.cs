@@ -341,6 +341,94 @@ namespace Nest.OData.Tests
         }
 
         [Fact]
+        public void MultipleOrNestedContains()
+        {
+            var queryOptions = "$filter=((contains(ProductDetail/Info,'test')) or (contains(Category,'test')) or (contains(Name,'test')) or (contains(ProductFeature/Name,'test'))) and ((Color eq 'Red'))&$orderby=CreatedDate desc&$top=10"
+                .GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"
+            {
+              ""query"": {
+                ""bool"": {
+                  ""must"": [
+                    {
+                      ""bool"": {
+                        ""minimum_should_match"": 1,
+                        ""should"": [
+                          {
+                            ""nested"": {
+                              ""path"": ""ProductDetail"",
+                              ""query"": {
+                                ""wildcard"": {
+                                  ""ProductDetail.Info"": {
+                                    ""value"": ""*test*""
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            ""wildcard"": {
+                              ""Category"": {
+                                ""value"": ""*test*""
+                              }
+                            }
+                          },
+                          {
+                            ""wildcard"": {
+                              ""Name"": {
+                                ""value"": ""*test*""
+                              }
+                            }
+                          },
+                          {
+                            ""nested"": {
+                              ""path"": ""ProductFeature"",
+                              ""query"": {
+                                ""wildcard"": {
+                                  ""ProductFeature.Name"": {
+                                    ""value"": ""*test*""
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      ""term"": {
+                        ""Color"": {
+                          ""value"": ""Red""
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              ""size"": 10,
+              ""sort"": [
+                {
+                  ""CreatedDate"": {
+                    ""order"": ""desc""
+                  }
+                }
+              ]
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
         public void ExpandMultipleSelectMultipleNestFilterSkipTop()
         {
             var queryOptions = "$expand=ProductDetail($expand=ProductRating)&$filter=(Color eq 'Red') and (Category eq 'Goods') and ProductDetail/Id eq 123&$select=Id,Name,Category&$top=5&$skip=5"
@@ -402,7 +490,5 @@ namespace Nest.OData.Tests
 
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
-
-        // 
     }
 }

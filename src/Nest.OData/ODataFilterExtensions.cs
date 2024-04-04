@@ -123,7 +123,7 @@ namespace Nest.OData
 
             var query = new TermsQuery { Field = fullyQualifiedFieldName, Terms = values };
 
-            if (node.Left is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
+            if (ExtractSourceNode(node.Left) is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
             {
                 return new NestedQuery
                 {
@@ -180,7 +180,7 @@ namespace Nest.OData
                 _ => throw new NotImplementedException($"Unsupported function: {node.Name}"),
             };
 
-            if (left is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
+            if (ExtractSourceNode(left) is SingleValuePropertyAccessNode singleValueNode && IsNavigationNode(singleValueNode.Source.Kind))
             {
                 return new NestedQuery
                 {
@@ -266,7 +266,7 @@ namespace Nest.OData
                 kind == QueryNodeKind.CollectionNavigationNode;
         }
 
-        private static SingleValueNode ExtractSourceNode(SingleValueNode node)
+        private static QueryNode ExtractSourceNode(QueryNode node)
         {
             if (node is ConvertNode convertNode)
             {
