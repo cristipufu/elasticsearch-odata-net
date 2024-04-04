@@ -22,7 +22,7 @@ namespace Nest.OData.Tests
                 ""query"": {
                     ""prefix"": {
                         ""Category"": {
-                            ""value"": ""Goods""
+                            ""value"": ""goods""
                         }
                     }
                 }
@@ -50,7 +50,7 @@ namespace Nest.OData.Tests
                 ""query"": {
                     ""wildcard"": {
                         ""Category"": {
-                            ""value"": ""*Goods""
+                            ""value"": ""*goods""
                         }
                     }
                 }
@@ -78,7 +78,7 @@ namespace Nest.OData.Tests
               ""query"": {
                 ""wildcard"": {
                   ""Category"": {
-                    ""value"": ""*Goods*""
+                    ""value"": ""*goods*""
                   }
                 }
               }

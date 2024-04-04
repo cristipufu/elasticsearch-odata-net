@@ -25,7 +25,7 @@ namespace Nest.OData.Tests
                   ""query"": {
                     ""wildcard"": {
                       ""ProductDetail.Info"": {
-                        ""value"": ""*searchTerm*""
+                        ""value"": ""*searchterm*""
                       }
                     }
                   }
@@ -84,7 +84,7 @@ namespace Nest.OData.Tests
             var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"
-            {""query"":{""term"":{""Tags"":{""value"":""Electronics""}}}}";
+            {""query"":{""term"":{""Tags"":{""value"":""electronics""}}}}";
 
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
@@ -111,7 +111,7 @@ namespace Nest.OData.Tests
                   ""query"": {
                     ""term"": {
                       ""ProductDetail.Tags"": {
-                        ""value"": ""Electronics""
+                        ""value"": ""electronics""
                       }
                     }
                   }}}}";
@@ -141,7 +141,7 @@ namespace Nest.OData.Tests
                         ""query"": {
                         ""term"": {
                             ""ProductSuppliers.Name"": {
-                            ""value"": ""Electronics""
+                            ""value"": ""electronics""
                             }
                         }
                     }
@@ -209,7 +209,7 @@ namespace Nest.OData.Tests
                               {
                                 ""term"": {
                                   ""ProductDetail.Tags"": {
-                                    ""value"": ""Electronics""
+                                    ""value"": ""electronics""
                                   }
                                 }
                               }

@@ -34,7 +34,7 @@ namespace Nest.OData.Tests
                 ""query"": {
                     ""term"": {
                         ""Category"": {
-                            ""value"": ""Goods""
+                            ""value"": ""goods""
                         }
                     }
                 }
@@ -61,7 +61,7 @@ namespace Nest.OData.Tests
             {
               ""query"": {
                 ""terms"": {
-                  ""Category"": [""Milk"", ""Cheese""]
+                  ""Category"": [""milk"", ""cheese""]
                 }
               }
             }";
@@ -123,7 +123,7 @@ namespace Nest.OData.Tests
             var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"
-            {""query"":{""bool"":{""must"":[{""term"":{""Category"":{""value"":""Goods""}}},{""term"":{""Color"":{""value"":""Red""}}}]}}}";
+            {""query"":{""bool"":{""must"":[{""term"":{""Category"":{""value"":""goods""}}},{""term"":{""Color"":{""value"":""Red""}}}]}}}";
 
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
@@ -143,7 +143,7 @@ namespace Nest.OData.Tests
             var queryJson = elasticQuery.ToJson();
 
             var expectedJson = @"
-            {""query"":{""bool"":{""minimum_should_match"":1,""should"":[{""term"":{""Category"":{""value"":""Goods""}}},{""term"":{""Color"":{""value"":""Red""}}}]}}}";
+            {""query"":{""bool"":{""minimum_should_match"":1,""should"":[{""term"":{""Category"":{""value"":""goods""}}},{""term"":{""Color"":{""value"":""Red""}}}]}}}";
 
             var actualJObject = JObject.Parse(queryJson);
             var expectedJObject = JObject.Parse(expectedJson);
@@ -244,14 +244,14 @@ namespace Nest.OData.Tests
                           {
                             ""term"": {
                               ""Category"": {
-                                ""value"": ""Goods""
+                                ""value"": ""goods""
                               }
                             }
                           },
                           {
                             ""term"": {
                               ""Name"": {
-                                ""value"": ""Phone""
+                                ""value"": ""phone""
                               }
                             }
                           }

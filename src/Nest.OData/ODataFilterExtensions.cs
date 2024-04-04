@@ -334,9 +334,16 @@ namespace Nest.OData
         {
             if (node is ConstantNode constantNode)
             {
-                if (constantNode.TypeReference?.Definition?.TypeKind is EdmTypeKind.Enum)
+                var typeKind = constantNode.TypeReference?.Definition?.TypeKind;
+
+                if (typeKind is EdmTypeKind.Enum)
                 {
                     return (constantNode.Value as ODataEnumValue).Value?.ToString();
+                }
+
+                if (typeKind is EdmTypeKind.Primitive && constantNode.TypeReference.PrimitiveKind() is EdmPrimitiveTypeKind.String)
+                {
+                    return (constantNode.Value as string)?.ToLower();
                 }
 
                 return constantNode.Value;

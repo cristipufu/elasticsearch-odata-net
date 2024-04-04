@@ -456,7 +456,7 @@ namespace Nest.OData.Tests
                     {
                       ""term"": {
                         ""Category"": {
-                          ""value"": ""Goods""
+                          ""value"": ""goods""
                         }
                       }
                     },
