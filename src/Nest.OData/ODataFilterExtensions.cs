@@ -23,24 +23,22 @@ namespace Nest.OData
                 return searchDescriptor;
             }
 
-            var queryContainer = TranslateExpression(filter.FilterClause.Expression);
-
-            if (queryContainer == null)
+            var queryContainer = filter.ToQueryContainer(new ODataExpressionContext
             {
-                return searchDescriptor.MatchAll();
-            }
+                Type = typeof(T),
+            });
 
             return searchDescriptor.Query(q => queryContainer);
         }
 
-        public static QueryContainer ToQueryContainer(this FilterQueryOption filter)
+        public static QueryContainer ToQueryContainer(this FilterQueryOption filter, ODataExpressionContext context = null)
         {
             if (filter?.FilterClause?.Expression == null)
             {
                 return new MatchAllQuery();
             }
 
-            var queryContainer = TranslateExpression(filter.FilterClause.Expression);
+            var queryContainer = TranslateExpression(filter.FilterClause.Expression, context);
 
             if (queryContainer == null)
             {
@@ -54,21 +52,21 @@ namespace Nest.OData
         {
             return node.Kind switch
             {
-                QueryNodeKind.Any => TranslateAnyNode(node as AnyNode),
-                QueryNodeKind.All => TranslateAllNode(node as AllNode),
-                QueryNodeKind.In => TranslateInNode(node as InNode),
+                QueryNodeKind.Any => TranslateAnyNode(node as AnyNode, context),
+                QueryNodeKind.All => TranslateAllNode(node as AllNode, context),
+                QueryNodeKind.In => TranslateInNode(node as InNode, context),
                 QueryNodeKind.BinaryOperator => TranslateOperatorNode(node as BinaryOperatorNode, context),
                 QueryNodeKind.SingleValueFunctionCall => TranslateFunctionCallNode(node as SingleValueFunctionCallNode, context),
-                QueryNodeKind.Convert => TranslateExpression(((ConvertNode)node).Source),
+                QueryNodeKind.Convert => TranslateExpression(((ConvertNode)node).Source, context),
                 QueryNodeKind.SingleValuePropertyAccess => null,
                 QueryNodeKind.Constant => null,
                 _ => throw new NotImplementedException($"Unsupported node type: {node.Kind}"),
             };
         }
 
-        private static QueryContainer TranslateAnyNode(AnyNode node)
+        private static QueryContainer TranslateAnyNode(AnyNode node, ODataExpressionContext context = null)
         {
-            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(node.Source);
+            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(node.Source, context);
 
             var isNavigationProperty = node.Source is CollectionNavigationNode ||
                 ((node.Source is CollectionPropertyAccessNode collectionNode) && ODataHelpers.IsNavigationNode(collectionNode.Source.Kind));
@@ -76,6 +74,7 @@ namespace Nest.OData
             var query = TranslateExpression(node.Body, new ODataExpressionContext
             {
                 PathPrefix = fullyQualifiedFieldName,
+                Type = context.Type,
             });
 
             if (isNavigationProperty)
@@ -90,9 +89,9 @@ namespace Nest.OData
             return query;
         }
 
-        private static QueryContainer TranslateAllNode(AllNode node)
+        private static QueryContainer TranslateAllNode(AllNode node, ODataExpressionContext context = null)
         {
-            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(node.Source);
+            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(node.Source, context);
 
             var isNavigationProperty = node.Source is CollectionNavigationNode ||
                 ((node.Source is CollectionPropertyAccessNode collectionNode) && ODataHelpers.IsNavigationNode(collectionNode.Source.Kind));
@@ -104,6 +103,7 @@ namespace Nest.OData
                     !TranslateExpression(node.Body, new ODataExpressionContext
                     {
                         PathPrefix = fullyQualifiedFieldName,
+                        Type = context.Type,
                     })
                 ]
             };
@@ -120,9 +120,9 @@ namespace Nest.OData
             return query;
         }
 
-        private static QueryContainer TranslateInNode(InNode node)
+        private static QueryContainer TranslateInNode(InNode node, ODataExpressionContext context = null)
         {
-            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(node.Left);
+            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(node.Left, context);
 
             if (node.Right is not CollectionConstantNode collectionNode)
             {
@@ -154,7 +154,7 @@ namespace Nest.OData
 
         private static QueryContainer TranslateOperatorNode(BinaryOperatorNode node, ODataExpressionContext context = null)
         {
-            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(node.Left, context?.PathPrefix);
+            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(node.Left, context);
 
             var query = node.OperatorKind switch
             {
@@ -185,7 +185,7 @@ namespace Nest.OData
         {
             var left = node.Parameters.First();
             var right = node.Parameters.Last();
-            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(left, context?.PathPrefix);
+            var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(left, context);
             var value = ExtractValue(right);
 
             var query = node.Name.ToLower() switch

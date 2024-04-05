@@ -36,6 +36,7 @@ namespace Nest.OData
                     var queryContainer = ODataFilterExtensions.TranslateExpression(expand.FilterOption.Expression, new ODataExpressionContext
                     {
                         PathPrefix = navigationPropertyName,
+                        Type = typeof(T),
                     });
 
                     queries.Add(new NestedQuery

@@ -21,6 +21,8 @@ namespace Nest.OData
                 return direction == OrderByDirection.Ascending ? SortOrder.Ascending : SortOrder.Descending;
             }
 
+            var type = typeof(T);
+
             searchDescriptor.Sort(s =>
             {
                 var orderByClause = orderByQueryOption.OrderByClause;
@@ -29,12 +31,13 @@ namespace Nest.OData
                 {
                     var expressionNode = orderByClause.Expression;
                     var direction = orderByClause.Direction;
-                    var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(expressionNode);
+                    var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(expressionNode, new ODataExpressionContext
+                    {
+                        Type = type,
+                    });
 
                     if (expressionNode is SingleValuePropertyAccessNode singleValueNode)
                     {
-                        var propertyName = singleValueNode.Property.Name;
-
                         if (ODataHelpers.IsNavigationNode(singleValueNode.Source.Kind))
                         {
                             s.Field(f => f.Field(fullyQualifiedFieldName)
@@ -43,7 +46,7 @@ namespace Nest.OData
                         }
                         else
                         {
-                            s.Field(f => f.Field(propertyName).Order(GetSortOrder(direction)));
+                            s.Field(f => f.Field(fullyQualifiedFieldName).Order(GetSortOrder(direction)));
                         }
                     }
 
