@@ -33,6 +33,23 @@ namespace Nest.OData
             return searchDescriptor.Query(q => queryContainer);
         }
 
+        public static QueryContainer ToQueryContainer(this FilterQueryOption filter)
+        {
+            if (filter?.FilterClause?.Expression == null)
+            {
+                return new MatchAllQuery();
+            }
+
+            var queryContainer = TranslateExpression(filter.FilterClause.Expression);
+
+            if (queryContainer == null)
+            {
+                return new MatchAllQuery();
+            }
+
+            return queryContainer;
+        }
+
         internal static QueryContainer TranslateExpression(QueryNode node, ODataExpressionContext context = null)
         {
             return node.Kind switch
