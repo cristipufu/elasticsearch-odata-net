@@ -64,7 +64,7 @@ namespace Nest.OData.Tests
         [Fact]
         public void OrderByNested()
         {
-            var queryOptions = "$orderby=Product/Id desc".GetODataQueryOptions<Product>();
+            var queryOptions = "$orderby=ProductDetail/Id desc".GetODataQueryOptions<Product>();
 
             var elasticQuery = queryOptions.ToElasticQuery();
 
@@ -76,11 +76,50 @@ namespace Nest.OData.Tests
             {
               ""sort"": [
                 {
-                  ""Product.Id"": {
+                  ""ProductDetail.Id"": {
                     ""nested"": {
-                      ""path"": ""Product""
+                      ""path"": ""ProductDetail""
                     },
                     ""order"": ""desc""
+                  }
+                }
+              ]
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
+        public void MultipleNestedOrderBy()
+        {
+            var queryOptions = "$orderby=ProductDetail/Info desc,ProductFeature/Id".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"
+            {
+              ""sort"": [
+                {
+                  ""ProductDetail.Info"": {
+                    ""nested"": {
+                      ""path"": ""ProductDetail""
+                    },
+                    ""order"": ""desc""
+                  }
+                },
+                {
+                  ""ProductFeature.Id"": {
+                    ""nested"": {
+                      ""path"": ""ProductFeature""
+                    },
+                    ""order"": ""asc""
                   }
                 }
               ]

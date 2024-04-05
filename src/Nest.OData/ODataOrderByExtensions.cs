@@ -23,18 +23,31 @@ namespace Nest.OData
 
             searchDescriptor.Sort(s =>
             {
-                foreach (var node in orderByQueryOption.OrderByNodes)
+                var orderByClause = orderByQueryOption.OrderByClause;
+
+                while (orderByClause != null)
                 {
-                    if (node is OrderByPropertyNode propertyNode)
+                    var expressionNode = orderByClause.Expression;
+                    var direction = orderByClause.Direction;
+                    var fullyQualifiedFieldName = ODataHelpers.ExtractFullyQualifiedFieldName(expressionNode);
+
+                    if (expressionNode is SingleValuePropertyAccessNode singleValueNode)
                     {
-                        s.Field(f => f.Field(propertyNode.Property.Name).Order(GetSortOrder(propertyNode.Direction)));
+                        var propertyName = singleValueNode.Property.Name;
+
+                        if (ODataHelpers.IsNavigationNode(singleValueNode.Source.Kind))
+                        {
+                            s.Field(f => f.Field(fullyQualifiedFieldName)
+                            .Order(GetSortOrder(direction))
+                            .Nested(n => n.Path(ODataHelpers.ExtractNestedPath(fullyQualifiedFieldName))));
+                        }
+                        else
+                        {
+                            s.Field(f => f.Field(propertyName).Order(GetSortOrder(direction)));
+                        }
                     }
-                    else if (node is OrderByOpenPropertyNode openPropertyNode &&
-                        openPropertyNode.OrderByClause.Expression is SingleValueOpenPropertyAccessNode singleValueNode && 
-                        singleValueNode.Source is SingleValueOpenPropertyAccessNode source)
-                    {
-                        s.Field(f => f.Field($"{source.Name}.{singleValueNode.Name}").Order(GetSortOrder(node.Direction)).Nested(n => n.Path(source.Name)));
-                    }
+
+                    orderByClause = orderByClause.ThenBy;
                 }
 
                 return s;
