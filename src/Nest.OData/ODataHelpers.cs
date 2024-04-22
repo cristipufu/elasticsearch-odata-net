@@ -13,6 +13,9 @@ namespace Nest.OData
             {
                 switch (currentNode)
                 {
+                    case SingleValueFunctionCallNode singleValueFunction:
+                        ProcessNode(singleValueFunction.Parameters.First());
+                        break;
                     case SingleValuePropertyAccessNode singleValue:
                         segments.Insert(0, singleValue.Property.Name);
                         ProcessNode(singleValue.Source);
