@@ -394,5 +394,71 @@ namespace Nest.OData.Tests
 
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
+
+        [Fact]
+        public void NestedKeywordEqualsGuid()
+        {
+            var queryOptions = "$filter=ProductDetail/Key eq 12345678-1234-1234-1234-123456789abc".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"
+            {
+              ""query"": {
+                ""nested"": {
+                  ""path"": ""ProductDetail.Key"",
+                  ""query"": {
+                    ""term"": {
+                      ""ProductDetail.Key.keyword"": {
+                        ""value"": ""12345678-1234-1234-1234-123456789abc""
+                      }
+                    }
+                  }
+                }
+              }
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
+        public void NestedCollectionKeywordEqualsGuid()
+        {
+            var queryOptions = "$filter=ProductOrders/any(s: s/Key eq 12345678-1234-1234-1234-123456789abc)".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"
+            {
+              ""query"": {
+                ""nested"": {
+                  ""path"": ""ProductOrders"",
+                  ""query"": {
+                    ""term"": {
+                      ""ProductOrders.Key.keyword"": {
+                        ""value"": ""12345678-1234-1234-1234-123456789abc""
+                      }
+                    }
+                  }
+                }
+              }
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
     }
 }

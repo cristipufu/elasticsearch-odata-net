@@ -130,5 +130,33 @@ namespace Nest.OData.Tests
 
             Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
         }
+
+        [Fact]
+        public void OrderByKeyword()
+        {
+            var queryOptions = "$orderby=Key desc".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"
+            {
+              ""sort"": [
+                {
+                  ""Key.keyword"": {
+                    ""order"": ""desc""
+                  }
+                }
+              ]
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
     }
 }

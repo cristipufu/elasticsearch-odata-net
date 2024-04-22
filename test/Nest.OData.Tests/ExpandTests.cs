@@ -39,6 +39,38 @@ namespace Nest.OData.Tests
         }
 
         [Fact]
+        public void ExpandWithFilterKeyword()
+        {
+            var queryOptions = "$expand=ProductDetail($filter=Key eq 12345678-1234-1234-1234-123456789abc)".GetODataQueryOptions<Product>();
+
+            var elasticQuery = queryOptions.ToElasticQuery();
+
+            Assert.NotNull(elasticQuery);
+
+            var queryJson = elasticQuery.ToJson();
+
+            var expectedJson = @"{
+              ""query"": {
+                ""nested"": {
+                  ""path"": ""ProductDetail"",
+                  ""query"": {
+                    ""term"": {
+                      ""ProductDetail.Key.keyword"": {
+                        ""value"": ""12345678-1234-1234-1234-123456789abc""
+                      }
+                    }
+                  }
+                }
+              }
+            }";
+
+            var actualJObject = JObject.Parse(queryJson);
+            var expectedJObject = JObject.Parse(expectedJson);
+
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject), "Expected and actual JSON do not match.");
+        }
+
+        [Fact]
         public void ExpandMultipleWithFilter()
         {
             var queryOptions = "$expand=ProductDetail($filter=Id eq 123),ProductFeature($filter=Id eq 456)".GetODataQueryOptions<Product>();

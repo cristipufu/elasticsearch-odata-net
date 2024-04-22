@@ -1,8 +1,10 @@
 ﻿#nullable disable
 namespace Nest.OData
 {
-    internal class ODataExpressionContext
+    public class ODataExpressionContext
     {
-        public string PathPrefix { get; set; }
+        internal string PathPrefix { get; set; }
+
+        public Type Type { get; set; }
     }
 }
