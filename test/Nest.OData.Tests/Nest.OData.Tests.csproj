@@ -12,7 +12,7 @@
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Release_V7'">
-		<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.2.5" />
+		<PackageReference Include="Microsoft.AspNetCore.OData" Version="7.5.12" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
